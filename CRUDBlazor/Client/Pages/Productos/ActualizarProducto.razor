@@ -1,0 +1,153 @@
+﻿@page "/actualizarproducto/{id}"
+@using CRUDBlazor.Shared.Productos
+@using CRUDBlazor.Shared.Proveedores
+@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Productos
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+<h3>ActualizarProducto</h3>
+<EditForm Model="producto" OnValidSubmit="EditarProducto" class="form-group">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>Nombre Producto: </label>
+    <InputText @bind-Value=producto.nombreProducto @bind-Value:event="oninput" class="form-control " placeholder="Nombre del producto"></InputText>
+    <label>Descripcion: </label>
+    <InputText @bind-Value=producto.descripcion @bind-Value:event="oninput" class="form-control mt-2" placeholder="Descripcion del producto"></InputText>
+    <label>Subir imagen: </label>
+    <InputFile OnChange="@OnInputFileChange" class="mt-2"></InputFile>
+    <br/>
+    <label>Imagen actual</label>
+    <br/>
+    <img src="@imageURL" alt="Imagen del producto aqui" style="height:100px; width:100px" />
+    <br/>
+    <label>Imagen a la que va ha cambiar</label>
+    <br/>
+    <!--Muestra la image el base 64 se coloca porque esta codificada asi  Cuando el navegador ve este string, sabe que tiene que convertir el 
+    base64 de nuevo a bytes para poder mostrar la imagen.-->
+    <img src="@($"data:{producto.TipoImagen};base64,{producto.imagen}")" alt="Para ver la imagen proporcione una realizando clic en el boton examinar" style="width:100px; height:100px" />
+    <br />
+    <label>Cantidad: </label>
+    <InputNumber @bind-Value=producto.cantidad  class="form-control mt-2 " placeholder="cantidad del producto"></InputNumber>
+    <label>Precio: </label>
+    <InputNumber @bind-Value=producto.precio class="form-control mt-2 " placeholder="precio del producto"></InputNumber>
+    <label>Seleccione Proveedor: </label>
+    <InputSelect @bind-Value=producto.idProveedor class="form-control mt-2">
+
+        @foreach (var proveedor in proveedores)
+        {
+            <option value="@proveedor.id">@proveedor.nombreProveedor</option>
+        }
+    </InputSelect>
+    <button type="submit" class="btn btn-primary mt-2">Actualizar Producto</button>
+</EditForm>
+@code {
+    //Se le pasa la id como parametro el motivo por el que se pone string es por como es la url, la url es string por lo tanto la id hay que
+    //pasarla como string luego en el controlador se convierte a numero
+    [Parameter]
+    public string id { get; set; }
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo ProductosViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private ProductosViewModel producto = new ProductosViewModel();
+    private ProveedorViewModel proveedor = new ProveedorViewModel();
+    // Esta propiedad almacena la imagen codificada. Se utiliza para mostrar la imagen del producto en la interfaz de usuario.
+    private string imageURL { get; set; }
+    // Creamos un array basado en ProveedorViewModel para poder operar con él. Este array almacenará todos los proveedores obtenidos de
+    // la operación GET.
+    private ProveedorViewModel[] proveedores = new ProveedorViewModel[0];
+    // En OnInitializedAsync, obtenemos todos los proveedores y los asignamos a nuestro array. Si hay proveedores disponibles,
+    // asignamos el ID del primer proveedor a nuestro producto.
+    // Luego, hacemos una petición GET al servidor para obtener el producto con la id dada y lo asignamos a nuestro producto. 
+    // Finalmente, cargamos la imagen del producto.
+    protected override async Task OnInitializedAsync()
+    {
+        //Al array le pasamos los proveedores obtenidos en la operacion get
+        proveedores = await GetProveedores();
+        if (proveedores.Length > 0)
+        {
+            //Obtenemos el id del proveedor que tiene ese producto
+            producto.idProveedor = proveedores[0].id;
+        }
+        //Se hace la peticion get al servidor para obtener el producto
+        var response = await http.GetAsync($"api/Producto/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            //Lee la respuesta serializada que devuelve el servidor
+            var content = await response.Content.ReadAsStringAsync();
+            //Deserializa la respuesta del servidor y muestra la informacion al usuario
+            producto = JsonSerializer.Deserialize<ProductosViewModel>(content);
+            //Carga la imagen que tiene ese producto
+            await LoadImage(producto.imagen);
+        }
+    }
+    private async Task<ProveedorViewModel[]> GetProveedores()
+    {
+        //Realiza una peticion get al servidor
+        var response = await http.GetAsync($"api/Proveedor");
+        Console.WriteLine("Esto es la respuesta:" + response);
+        //Lee la respuesta serializada del servidor
+        var content = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("Esto es el contenido:" + content);
+        //Muestra al usuario la respuesta deserializada
+        return JsonSerializer.Deserialize<ProveedorViewModel[]>(content);
+    }
+    // OnInputFileChange se encarga del manejo de archivos. Cuando se selecciona un archivo, lo lee, lo convierte a un array de bytes, 
+    // lo codifica en base64 y guarda la información relevante en nuestro producto.
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        //Obtiene la imagen que estamos cargando
+        var imageFile = e.File;
+        if (imageFile != null)
+        {
+            //Inicializa el memorystream que es la memoria 
+            using var memoryStream = new MemoryStream();
+            //Abre la imagen la lee, comprueba que no pase el tamaño maximo permitido
+            await imageFile.OpenReadStream(maxAllowedSize: 6 * 1024 * 1024) 
+            //lo almacena en el memorystream la memoria
+                .CopyToAsync(memoryStream);
+            //La imagen la transforma a un array de bytes
+            var contenido = memoryStream.ToArray();
+            //toma el array de bytes y lo codifica a base64 y lo almacena en producto.imagen
+            producto.imagen = Convert.ToBase64String(contenido);
+            //Obtiene la extension de la imagen cargada
+            var extension = Path.GetExtension(imageFile.Name);
+            //Se le asigna la extension 
+            producto.extension = extension;
+            //Guarda el tipo de imagen esto tiene esta pinta image/jpeg
+            producto.TipoImagen = imageFile.ContentType;
+        }
+    }
+
+    private async Task EditarProducto()
+    {
+        //Toma los datos que el usuario a introducido y lo serializa.
+        var jsonProducto = JsonSerializer.Serialize(producto);
+        //Toma ese producto serializado y los transforma a un json
+        var contenido = new StringContent(jsonProducto, Encoding.UTF8, "application/json");
+        //Hace la peticion al servidor y le manda el producto en formato json al servidor
+        var resultado = await http.PutAsync($"api/Producto/{id}", contenido);
+        if (resultado.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Producto creado con éxito");
+            NavigationManager.NavigateTo("/productos");
+        }
+        else
+        {
+            Console.WriteLine("Error al actualizar el producto");
+        }
+
+    }
+    //Metodo para cargar la imagen almacenada en el servidor
+    private async Task LoadImage(string imageUrl)
+    {
+       //obtenemos la url de la imagen y lo almacenamos en la variable
+        imageURL = imageUrl;
+    }
+
+}

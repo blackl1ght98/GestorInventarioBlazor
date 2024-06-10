@@ -1,0 +1,38 @@
+﻿@page "/Payment/Success"
+@using System.Text
+@using System.Text.Json
+@using System.Web
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+
+
+<h1>Pago realizado con exito</h1>
+
+
+@code {
+    private string paymentId;
+    private string PayerID;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Permite modificar el comportamiento natural de una url
+        var uri = new Uri(NavigationManager.Uri);
+        //Convierte estos parametros en consulta que se pueden pasar por url
+        paymentId = HttpUtility.ParseQueryString(uri.Query).Get("paymentId");
+        PayerID = HttpUtility.ParseQueryString(uri.Query).Get("PayerID");
+        var response = await http.GetAsync($"api/Payment/Success?paymentId={paymentId}&PayerID={PayerID}");
+        Console.WriteLine("Las respues" + response);
+        if (response.IsSuccessStatusCode)
+        {
+            // El pago se completó con éxito
+            NavigationManager.NavigateTo("/productos");
+        }
+        else
+        {
+            // Hubo un error al completar el pago
+            NavigationManager.NavigateTo("/PaymentError");
+        }
+    }
+
+   
+}

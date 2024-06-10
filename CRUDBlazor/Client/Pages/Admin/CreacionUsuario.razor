@@ -1,0 +1,66 @@
+﻿@page "/crearusuario"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Admin
+
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+<h3>Creacion Usuario</h3>
+<EditForm Model="usuario" class="form-group">
+    <label>Introduzca su email: </label>
+    <InputText @bind-Value=usuario.email class="form-control" placeholder="Introduzca su email"></InputText>
+    @if (showAlert)
+    {
+        <div class="alert alert-danger mt-2" role="alert">
+            @alertMessage
+        </div>
+    }
+    <label>Introduzca su nombre</label>
+    <InputText @bind-Value=usuario.nombreCompleto class="form-control" placeholder="Introduzca su nombre"></InputText>
+    <label>Introduzca su fecha de nacimiento: </label>
+    <InputDate @bind-Value=usuario.fechaNacimiento class="form-control"></InputDate>
+    <label>Introduzca su telefono</label>
+    <InputText @bind-Value=usuario.telefono class="form-control" placeholder="Introduzca su telefono"></InputText>
+    <label>Introduzca su direccion </label>
+    <InputText @bind-Value=usuario.direccion class="form-control" placeholder="Introduzca su direccion"></InputText>
+    <label>Introduzca su contraseña: </label>
+    <input @bind-value="usuario.password" @bind-value:event="oninput" type="password" class="form-control" placeholder="Introduzca su contraseña" />
+
+    <button @onclick="(()=>CrearUsuario(usuario))" class="btn btn-primary mt-2">Crear Usuario</button>
+</EditForm>
+
+@code {
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo CreacionUsuarioModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private CreacionUsuarioModel usuario = new CreacionUsuarioModel();
+    private bool showAlert = false;
+    private string alertMessage = "";
+    
+    //Este metodo se ejecuta cuando le damos al boton crear usuario
+    private async Task CrearUsuario(CreacionUsuarioModel miusuario)
+    {
+        //Realiza la peticion al servidor
+        var resultado = await http.PostAsJsonAsync($"api/Admin/create", miusuario);
+        if (resultado.IsSuccessStatusCode)
+        {
+           
+            NavigationManager.NavigateTo("/administrarusuarios");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+}

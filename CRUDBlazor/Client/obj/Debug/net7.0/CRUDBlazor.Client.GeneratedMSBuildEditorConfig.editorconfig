@@ -1,0 +1,155 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net7.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = CRUDBlazor.Client
+build_property.RootNamespace = CRUDBlazor.Client
+build_property.ProjectDir = C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Client\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 7.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Client
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Admin/AdministrarUsuarios.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQWRtaW5pc3RyYXJVc3Vhcmlvcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Admin/CreacionUsuario.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQ3JlYWNpb25Vc3VhcmlvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Admin/EliminarUsuario.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRWxpbWluYXJVc3VhcmlvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Admin/UpdateUser.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXBkYXRlVXNlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Auth/Autenticacion.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxBdXRlbnRpY2FjaW9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Auth/Logout.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxMb2dvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Auth/ResetPassword.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxSZXNldFBhc3N3b3JkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Auth/RestorePassword.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxSZXN0b3JlUGFzc3dvcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Carrito/ObtenerItemsCarrito.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2Fycml0b1xPYnRlbmVySXRlbXNDYXJyaXRvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Carrito/Payment.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2Fycml0b1xQYXltZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Departamento/ActualizacionDepartamento.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVwYXJ0YW1lbnRvXEFjdHVhbGl6YWNpb25EZXBhcnRhbWVudG8ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Departamento/CrearDepartamento.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVwYXJ0YW1lbnRvXENyZWFyRGVwYXJ0YW1lbnRvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Departamento/DepartamentoObteners.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVwYXJ0YW1lbnRvXERlcGFydGFtZW50b09idGVuZXJzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Home/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZVxJbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/ActualizarPedido.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xBY3R1YWxpemFyUGVkaWRvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/CrearPedido.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xDcmVhclBlZGlkby5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/EliminarPedido.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xFbGltaW5hclBlZGlkby5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/ObtenerDetallesPedido.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xPYnRlbmVyRGV0YWxsZXNQZWRpZG8ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/Pedidos.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xQZWRpZG9zLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Productos/ActualizarProducto.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvZHVjdG9zXEFjdHVhbGl6YXJQcm9kdWN0by5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Productos/CrearProducto.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvZHVjdG9zXENyZWFyUHJvZHVjdG8ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Productos/EliminarProducto.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvZHVjdG9zXEVsaW1pbmFyUHJvZHVjdG8ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Productos/Producto.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvZHVjdG9zXFByb2R1Y3RvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Proveedores/ActualizarProveedor.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvdmVlZG9yZXNcQWN0dWFsaXphclByb3ZlZWRvci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Proveedores/CrearProveedor.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvdmVlZG9yZXNcQ3JlYXJQcm92ZWVkb3IucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Proveedores/EliminarProveedor.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvdmVlZG9yZXNcRWxpbWluYXJQcm92ZWVkb3IucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Proveedores/Proveedor.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvdmVlZG9yZXNcUHJvdmVlZG9yLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Shared/ConfiguracionPaginacion.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXENvbmZpZ3VyYWNpb25QYWdpbmFjaW9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Shared/SurveyPrompt.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFN1cnZleVByb21wdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Shared/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-a3wfilq6n3
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Shared/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE5hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-eeyhvrrkps

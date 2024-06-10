@@ -1,0 +1,95 @@
+﻿@page "/actualizarpedido/{id}"
+@using CRUDBlazor.Shared.Pedidos
+@using System.Text.Json
+@using System.Text
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+<h3>Actualizar Pedido</h3>
+<EditForm Model="pedido" OnValidSubmit="ActualizacionPedido" class="form-group">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+    <label>Fecha Pedido: </label>
+    <InputDate @bind-Value=pedido.fechaPedido class="form-control mt-2" placeholder="Descripcion del producto"></InputDate>
+    <ValidationMessage For="@(() => pedido.fechaPedido)" />
+    <label>Estado Pedido: </label>
+    <InputSelect @bind-Value="@pedido.estadoPedido" class="form-control mt-2">
+        @foreach (EstadoPedido estado in Enum.GetValues(typeof(EstadoPedido)))
+        {
+            <option value="@estado.ToString()">@estado.GetDescription()</option>
+        }
+    </InputSelect>
+    <ValidationMessage For="@(() => pedido.estadoPedido)" />
+    @if (showAlert)
+    {
+        <div class="alert alert-danger" role="alert">
+            @alertMessage
+        </div>
+    }
+    <button type="submit" class="btn btn-primary mt-2">Crear Pedido</button>
+</EditForm>
+@code {
+    //La id se pasa como parametro a la url, como la url es de tipo string la id tambien tiene que ser de tipo string luego al controlador
+    //se le pasa que recibe algo de tipo string y luego en el controller se convierte a int
+  [Parameter]
+  public string id { get; set; }
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo EditarPedido nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private EditarPedido pedido = new EditarPedido();
+    private bool showAlert = false;
+    private string alertMessage = "";
+    //Este metodo OnInitializedAsync permite que se carguen otros metodos al cargar la pagina
+    protected override async Task OnInitializedAsync()
+    {
+        //Realiza la peticion get al servidor
+        var response = await http.GetAsync($"api/Pedidos/{id}");
+        //Lee la respuesta serializada
+        var content = await response.Content.ReadAsStringAsync();
+        //Deserializa la respuesta para que el usuario la pueda ver
+        pedido = JsonSerializer.Deserialize<EditarPedido>(content);
+
+        // Inicializa el estado del pedido al estado actual
+        if (Enum.TryParse<EstadoPedido>(pedido.estadoPedido, out var estado))
+        {
+            pedido.estadoPedido = estado.ToString();
+        }
+        else
+        {
+            Console.WriteLine("Estado de pedido inválido");
+        }
+    }
+    //Cuando hacemos clic en el boton crear pedido viene a este metodo y hace una peticion de actualizacion del pedido al servidor
+    private async Task ActualizacionPedido()
+    {
+      
+        Console.WriteLine("Después del bucle for");
+        //Se le pasa el pedido serializado 
+        var jsonProducto = JsonSerializer.Serialize(pedido);
+        //Ese pedido serializado se transforma a json
+        var contenido = new StringContent(jsonProducto, Encoding.UTF8, "application/json");
+        //Una vez transformado el pedido en json se realiza la peticion al servidor
+        var resultado = await http.PutAsync($"api/Pedidos/{pedido.id}", contenido);
+        if (resultado.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Pedido actualizado con éxito");
+            NavigationManager.NavigateTo("/pedidos");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+    
+}

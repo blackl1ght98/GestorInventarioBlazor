@@ -1,0 +1,176 @@
+﻿@page "/crearpedido"
+@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Pedidos
+@using CRUDBlazor.Shared.Productos
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+<h3>Crear Pedido</h3>
+<EditForm Model="pedido" OnValidSubmit="CreacionPedido" class="form-group">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>Numero Pedido: </label>
+    <InputText @bind-Value=pedido.numeroPedido class="form-control " placeholder="Numero del pedido"></InputText>
+    <button type="button" class="btn btn-primary mt-2" @onclick="@(() => GenerarNumeroPedido())">Actualizar numero pedido</button>
+    <br/>
+    <ValidationMessage For="@(() => pedido.numeroPedido)" />
+    <label>Fecha Pedido: </label>
+    <InputDate @bind-Value=pedido.fechaPedido class="form-control mt-2" placeholder="Descripcion del producto"></InputDate>
+    <ValidationMessage For="@(() => pedido.fechaPedido)" />
+    <label>Estado Pedido: </label>
+    <InputSelect @bind-Value="@pedido.estadoPedido" class="form-control mt-2">
+        @foreach (EstadoPedido estado in Enum.GetValues(typeof(EstadoPedido)))
+        {
+            <option value="@estado.ToString()">@estado.GetDescription()</option>
+        }
+    </InputSelect>
+    <label>Seleccione Cliente: </label>
+    <InputSelect @bind-Value=pedido.idUsuario class="form-control mt-2">
+        @foreach (var usuarios in usuarios)
+        {
+            <option value="@usuarios.id">@usuarios.nombreCompleto</option>
+        }
+    </InputSelect>
+    @for (var i = 0; i < productos.Length; i++)
+    {
+        var producto = productos[i];
+        var index = i; // Guarda el índice en una variable local para evitar problemas con el cierre de variables
+        <div>
+           
+            <input type="checkbox" @bind-value=pedido.productosSeleccionados[index] /> @producto.nombreProducto
+            <input type="number" @bind-value=pedido.cantidades[index] class="mt-2" />
+        </div>
+    }
+    @if (showAlert)
+    {
+        <div class="alert alert-danger" role="alert">
+            @alertMessage
+        </div>
+    }
+    <button type="submit" class="btn btn-primary mt-2">Crear Proveedor</button>
+</EditForm>
+@code {
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo PedidosViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private PedidosViewModel pedido = new PedidosViewModel();
+    // Creamos un array basado en UsuarioViewModel para poder operar con él. Este array almacenará todos los usuarios obtenidos de
+    // la operación GET.
+    private UsuarioViewModel[] usuarios = new UsuarioViewModel[0];
+    // Creamos un array basado en ProductosViewModel para poder operar con él. Este array almacenará todos los productos obtenidos de
+    // la operación GET.
+    private ProductosViewModel[] productos = new ProductosViewModel[0];
+    private bool showAlert = false;
+    private string alertMessage = "";
+ 
+    protected override async Task OnInitializedAsync()
+    {
+        //Obtenemos todos los usuarios
+        usuarios = await GetAllUsers();
+        //Cuando se va a crear un pedido se muestra un desplegable pues lo que hace esto es tomar los usuarios cojidos en el get y permitir
+        //asignar a un usuario un pedido
+        if (usuarios.Length > 0)
+        {
+            pedido.idUsuario = usuarios[0].id;
+        }
+        //Obtenemos todos los productos
+        productos = await GetAllProductos();
+        //Al inicio el usuario no ha seleccionado ningun producto por lo tanto se pone todos los productos en false
+         pedido.productosSeleccionados = Enumerable.Repeat(false, productos.Length).ToList();
+        //Al inicio el usuario no ha puesto ninguna cantidad por lo tanto las cantidades de todos lo productos se inicializan en 0
+        pedido.cantidades = new List<int>(new int[productos.Length]);
+        //Se genera un numero de pedido aleatorio
+        pedido.numeroPedido = GenerarNumeroPedido();
+        //Intenta convertir la enumeracion en string y lo almacena en la variable estado
+        if (Enum.TryParse<EstadoPedido>(pedido.estadoPedido, out var estado))
+        {
+            //Si la conversion fue exitosa pues le asigna el estado seleccionado por el usuario y lo transforma a string
+            pedido.estadoPedido = estado.ToString();
+        }
+        else
+        {
+            Console.WriteLine("Estado de pedido inválido");
+        }
+    }
+    //Realiza una peticion al servidor que obtiene todos los usuarios
+    private async Task<UsuarioViewModel[]> GetAllUsers()
+    {
+        var response = await http.GetAsync($"api/Admin");
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<UsuarioViewModel[]>(content);
+    }
+    //Realiza una peticion al servidor que obtiene todos los productos
+    private async Task<ProductosViewModel[]> GetAllProductos()
+    {
+        var response = await http.GetAsync($"api/Producto/all");
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<ProductosViewModel[]>(content);
+    }
+    private async Task CreacionPedido()
+    {
+        Console.WriteLine("Inicio de CreacionPedido");
+        //Se crea una lista que almacena la ids de los productos
+        pedido.idsProducto = new List<int>();
+        //Se crea una lista que almacena la cantidad de cada producto
+        //pedido.cantidades = new List<int>(new int[productos.Length]);
+        Console.WriteLine("Antes del bucle for");
+        /* El bucle for que vemos a continuación funciona de la siguiente manera:
+       * 1º Inicializa la variable i en 0.
+       * 2º La condición --> si la variable i es menor que la longitud del array de productos, el bucle continúa. Esto asegura que el bucle 
+       * recorra todos los productos en la base de datos.
+       * 3º La condición if --> Esta condición verifica si el producto en la posición i ha sido seleccionado por el usuario. Si es así, 
+       * el producto se agrega a la lista de productos seleccionados.
+       * 4º Una vez que tenemos los productos que se han seleccionado, vamos a otra lista donde están todos los id de los productos. 
+       * Aquí, agregamos el id del producto seleccionado a la lista pedido.idsProducto.
+       * 5º pedido.cantidades[i] --> esto es una lista con la cantidad de cada producto que previamente se haya seleccionado. Aquí, almacenamos 
+       * la cantidad del producto seleccionado en la misma posición que el producto en la lista pedido.idsProducto.
+       */
+        for (var i = 0; i < productos.Length; i++)
+        {
+            Console.WriteLine("Iteración " + i);
+            if (pedido.productosSeleccionados[i])
+                Console.WriteLine("Valor de pedido.productosSeleccionados[" + i + "]: " + pedido.productosSeleccionados[i]);
+            {
+                Console.WriteLine(i + " Los productos seleccionados son: " + pedido.productosSeleccionados[i]);
+                pedido.idsProducto.Add(productos[i].id);
+                pedido.cantidades[i] = pedido.cantidades[i];
+            }
+        }
+        Console.WriteLine("Después del bucle for");
+        //Toma toda la informacion proporcionada por el usuario y lo serializa
+        var jsonProducto = JsonSerializer.Serialize(pedido);
+        //Toma esa serializacion y lo transforma en json
+        var contenido = new StringContent(jsonProducto, Encoding.UTF8, "application/json");
+        //Realiza la peticion al servidor
+        var resultado = await http.PostAsync($"api/Pedidos", contenido);
+        if (resultado.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Pedido creado con éxito");
+            NavigationManager.NavigateTo("/pedidos");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    private string GenerarNumeroPedido()
+    {
+        var length = 10;
+        var random = new Random();
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        pedido.numeroPedido = new string(Enumerable.Repeat(chars, length)
+          .Select(s => s[random.Next(s.Length)]).ToArray());
+        return pedido.numeroPedido;
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+}

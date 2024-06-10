@@ -1,0 +1,30 @@
+﻿@page "/crearproveedor"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Proveedores
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+<h3>CrearProveedor</h3>
+<EditForm Model="proveedor" class="form-group">
+    <InputText @bind-Value=proveedor.nombreProveedor class="form-control " placeholder="Nombre del proveedor"></InputText>
+    <InputText @bind-Value=proveedor.contacto class="form-control mt-2" placeholder="Contacto del proveedor"></InputText>
+    <InputText @bind-Value=proveedor.direccion class="form-control mt-2" placeholder="direccion del proveedor"></InputText>
+    <button @onclick="(()=>CreacionProveedor(proveedor))" class="btn btn-primary mt-2">Crear Proveedor</button>
+</EditForm>
+@code {
+    private ProveedorViewModel proveedor = new ProveedorViewModel();
+    //Cuando tu le das al boton de crear proveedor llama a esta funcion.
+    private async Task CreacionProveedor(ProveedorViewModel proveedor) 
+    {
+        //La funcion PostAsJsonAsync hace la deserializacion del json de manera automatica, que desventaja tiene esto
+        //que si hay un error es mejor escribir unas lineas de mas y hacer la deserializacion manual ya que asi puedes ver
+        //de donde viene el error o si algun campo del json es null y ese campo nu tiene que ser null
+        var resultado = await http.PostAsJsonAsync($"api/Proveedor", proveedor);
+        //Como he explicado en el comentario anterior PostAsJsonAsync hace la deserialización de manera automatica y puede existir
+        //la posibilidad de error, pues si hay algun error pasandole esta condición lo sabremos
+        if (resultado.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/proveedores");
+        }
+        
+    }
+}

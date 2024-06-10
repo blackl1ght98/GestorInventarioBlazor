@@ -1,0 +1,75 @@
+﻿@page "/departamentos"
+@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Departamento
+@inject HttpClient http
+<h1>Departamentos</h1>
+@if (departamentos == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var departamento in departamentos)
+            {
+                <tr>
+                    <td>@departamento.nombre</td>
+                    <td>
+                        <button @onclick="(()=>EliminarDepartamento(departamento.idDepartamento))">Eliminar</button>
+                    </td>
+                    <td><a href="/actualizardepartamento/@departamento.idDepartamento" class="btn btn-primary">Actualizar</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<a href="/creardepartamento" class="btn btn-info">Crear departamento</a>
+<br />
+@code {
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo Departamento nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private Departamento nuevoDepartamento = new Departamento();
+    // Creamos un array basado en Departamento para poder operar con él. Este array almacenará todos los departamentos obtenidos de
+    // la operación GET.
+    private Departamento[] departamentos;
+    //Este metodo OnInitializedAsync cualquier metodo que pongas aqui se inicializa en cuanto se carga la pagina
+    protected override async Task OnInitializedAsync()
+    {
+        departamentos = await GetDepartamentos();
+    }
+    //Peticion get que se hace al servidor
+    private async Task<Departamento[]> GetDepartamentos() 
+    {
+        //Peticion al servidor
+        var response = await http.GetAsync("api/Departamento");
+        //Lee la respuesta y la serializa
+        var content = await response.Content.ReadAsStringAsync();
+        //Deserializa la respuesta para que el usuario la pueda ver
+        return JsonSerializer.Deserialize<Departamento[]>(content);
+    }
+    //Cuando le damos al boton de eliminar llama a esta funcion
+    private async Task EliminarDepartamento(int idDepartamento) 
+    {
+        //Realiza la peticion 
+        var resultado = await http.DeleteAsync($"api/Departamento/{idDepartamento}");
+        //Vuelve a obtener los departamento
+        departamentos = await GetDepartamentos(); 
+    }
+
+
+}

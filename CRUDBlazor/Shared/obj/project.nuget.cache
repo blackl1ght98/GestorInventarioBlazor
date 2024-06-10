@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "dgSpecHash": "FIQQ1ghIL/HF9Q4JywCJB0LP19qQWQdWaPygw7W/tHVXe6TCXqEzzxgIq7zj77BrqY7Rhvxm/G3VSR4/OiMvBg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Shared\\CRUDBlazor.Shared.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.aspnetcore.authorization\\7.0.18\\microsoft.aspnetcore.authorization.7.0.18.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.aspnetcore.components\\7.0.18\\microsoft.aspnetcore.components.7.0.18.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.aspnetcore.components.analyzers\\7.0.18\\microsoft.aspnetcore.components.analyzers.7.0.18.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.aspnetcore.components.forms\\7.0.18\\microsoft.aspnetcore.components.forms.7.0.18.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.aspnetcore.components.web\\7.0.18\\microsoft.aspnetcore.components.web.7.0.18.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.aspnetcore.http.features\\5.0.17\\microsoft.aspnetcore.http.features.5.0.17.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.aspnetcore.metadata\\7.0.18\\microsoft.aspnetcore.metadata.7.0.18.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.entityframeworkcore\\7.0.17\\microsoft.entityframeworkcore.7.0.17.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\7.0.17\\microsoft.entityframeworkcore.abstractions.7.0.17.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\7.0.17\\microsoft.entityframeworkcore.analyzers.7.0.17.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\7.0.0\\microsoft.extensions.caching.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.caching.memory\\7.0.0\\microsoft.extensions.caching.memory.7.0.0.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\7.0.0\\microsoft.extensions.dependencyinjection.7.0.0.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\7.0.0\\microsoft.extensions.dependencyinjection.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.logging\\7.0.0\\microsoft.extensions.logging.7.0.0.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.1\\microsoft.extensions.logging.abstractions.7.0.1.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.options\\7.0.1\\microsoft.extensions.options.7.0.1.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.primitives\\7.0.0\\microsoft.extensions.primitives.7.0.0.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.jsinterop\\7.0.18\\microsoft.jsinterop.7.0.18.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\system.io.pipelines\\7.0.0\\system.io.pipelines.7.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

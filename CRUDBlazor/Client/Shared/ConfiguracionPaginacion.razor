@@ -1,0 +1,99 @@
+﻿@*  Este es un componente de paginación en Blazor.
+ Utiliza un bucle foreach para generar elementos de lista para cada página en 'paginas'.
+ Cada elemento de lista tiene un controlador de eventos onclick que llama a 'PaginaSeleccionadaInterno' cuando se hace clic en él.
+Los elementos de lista se deshabilitan si su página correspondiente no está habilitada.
+ El elemento de lista de la página actual tiene la clase 'active'. *@
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+        @foreach (var pagina in paginas)
+        {
+            <li @onclick="@(()=>PaginaSeleccionadaInterno(pagina))"
+                style="cursor:pointer;"
+                class="page-item @(pagina.Habilitada ? null :"disabled") @(pagina.Activa ? "active":null)">
+                <spn class="page-link" href="#">@pagina.Texto</spn>
+            </li>
+        }
+    </ul>
+</nav>
+
+@code {
+    // Define los parámetros del componente.
+    // Estos pueden ser establecidos por el componente padre.
+    [Parameter]
+    public int PaginaActual { get; set; } = 1;
+    [Parameter]
+    public int PaginasTotales { get; set; }
+    [Parameter]
+    public int Radio { get; set; } = 3;
+    [Parameter]
+    public EventCallback<int> PaginaSeleccionada { get; set; }
+
+    // Define una lista para almacenar los modelos de las páginas.
+    List<PaginasModel> paginas = new List<PaginasModel>();
+
+    // Este método se llama cada vez que se establecen los parámetros del componente.
+    // Se utiliza para cargar las páginas.
+    protected override void OnParametersSet()
+    {
+        CargarPaginas();
+    }
+
+    // Este método se llama cuando se selecciona una página.
+    // Si la página seleccionada es la página actual o no está habilitada, no hace nada.
+    // De lo contrario, establece la página actual a la página seleccionada, carga las páginas y llama al callback 'PaginaSeleccionada'.
+    private async Task PaginaSeleccionadaInterno(PaginasModel pagina)
+    {
+        if (pagina.Pagina == PaginaActual)
+        {
+            return;
+        }
+        if (!pagina.Habilitada)
+        {
+            return;
+        }
+        PaginaActual = pagina.Pagina;
+        CargarPaginas();
+        await PaginaSeleccionada.InvokeAsync(pagina.Pagina);
+    }
+
+    // Este método carga las páginas.
+    // Primero, crea una nueva lista de páginas.
+    // Luego, añade un modelo de página para la página anterior.
+    // Después, añade un modelo de página para cada página dentro del rango definido por el radio.
+    // Finalmente, añade un modelo de página para la página siguiente.
+    private void CargarPaginas()
+    {
+        paginas = new List<PaginasModel>();
+        var paginaAnteriorHabilitada = PaginaActual != 1;
+        var paginaAnterior = (PaginaActual == 1) ? 1 : PaginaActual - 1;
+        paginas.Add(new PaginasModel(paginaAnterior, paginaAnteriorHabilitada, "Anterior"));
+        for (int i = 1; i <= PaginasTotales; i++)
+        {
+            if (i >= PaginaActual - Radio && i <= PaginaActual + Radio)
+            {
+                paginas.Add(new PaginasModel(i) { Activa = PaginaActual == i });
+            }
+        }
+        var paginaSiguienteHabilitada = PaginaActual != PaginasTotales;
+        var paginaSiguiente = (PaginaActual == PaginasTotales) ? PaginasTotales : PaginaActual + 1;
+        paginas.Add(new PaginasModel(paginaSiguiente, paginaSiguienteHabilitada, "Siguiente"));
+    }
+
+    // Esta es la clase para el modelo de las páginas.
+    // Cada modelo de página tiene un texto, un número de página, y dos indicadores para si está habilitada y si es la página activa.
+    class PaginasModel
+    {
+        public PaginasModel(int pagina) : this(pagina, true) { }
+        public PaginasModel(int pagina, bool habilitada) : this(pagina, habilitada, pagina.ToString()) { }
+        public PaginasModel(int pagina, bool habilitada, string texto)
+        {
+            Pagina = pagina;
+            Habilitada = habilitada;
+            Texto = texto;
+        }
+        public string Texto { get; set; }
+        public int Pagina { get; set; }
+        public bool Habilitada { get; set; } = true;
+        public bool Activa { get; set; } = false;
+    }
+}

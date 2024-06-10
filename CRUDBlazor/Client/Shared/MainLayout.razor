@@ -1,0 +1,55 @@
+﻿@inherits LayoutComponentBase
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider authProvider
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        @* <div class="top-row px-4">
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div> *@
+        <div class="top-row d-flex justify-content-end px-3">
+            <div class="pr-2">
+                <NavLink class="nav-link" href="login" Match="NavLinkMatch.All">
+                    <span class="oi oi-account-login" aria-hidden="true"></span> Iniciar sesión
+                </NavLink>
+            </div>
+            <div>
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="CerrarSesion">
+                    <span class="oi oi-account-logout" aria-hidden="true"></span> Cerrar sesion
+                </NavLink>
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+@code {
+    private async Task CerrarSesion()
+    {
+        var response = await http.PostAsync("api/Auth/logout", new StringContent(string.Empty));
+
+        if (response.IsSuccessStatusCode)
+        {
+            var authProviderService = authProvider as CustomAuthenticationStateProvider;
+            if (authProviderService != null)
+            {
+                await authProviderService.UpdateAuthenticationStateAsync();
+            }
+
+            // Redirige al usuario a la página de inicio después de cerrar la sesión
+            NavigationManager.NavigateTo("/logout");
+        }
+        else
+        {
+            // Maneja el error
+        }
+    }
+
+}

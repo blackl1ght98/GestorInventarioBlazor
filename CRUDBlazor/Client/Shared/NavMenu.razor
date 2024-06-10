@@ -1,0 +1,107 @@
+﻿@inject HttpClient http
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider authProvider
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">CRUDBlazor</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+    <AuthorizeView Roles="administrador">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="administrarusuarios" Match="NavLinkMatch.All">
+                <span class="oi oi-shield" aria-hidden="true"></span> Administrar
+            </NavLink>
+        </div>
+   </AuthorizeView>
+    <AuthorizeView Roles="administrador">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="proveedores" Match="NavLinkMatch.All">
+                <span class="oi oi-person" aria-hidden="true"></span> Proveedores
+            </NavLink>
+        </div>
+        </AuthorizeView>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="productos" Match="NavLinkMatch.All">
+                <span class="oi oi-person" aria-hidden="true"></span> Productos
+            </NavLink>
+        </div>
+         <AuthorizeView Roles="administrador, usuario">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="pedidos" Match="NavLinkMatch.All">
+                <span class="oi oi-person" aria-hidden="true"></span> Pedidos
+            </NavLink>
+        </div>
+        </AuthorizeView>
+         <AuthorizeView Roles="administrador, usuario">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="carritoitems" Match="NavLinkMatch.All">
+                <span class="oi oi-person" aria-hidden="true"></span> Carrito
+            </NavLink>
+        </div>
+        </AuthorizeView>
+         <AuthorizeView Roles="administrador">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="departamentos" Match="NavLinkMatch.All">
+                <span class="oi oi-person" aria-hidden="true"></span> Departamentos
+            </NavLink>
+        </div>
+        </AuthorizeView>
+       @*  <div class="nav-item px-3">
+            <NavLink class="nav-link" href="login" Match="NavLinkMatch.All">
+                <span class="oi oi-account-login" aria-hidden="true"></span> Iniciar sesión
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="CerrarSesion">
+                <span class="oi oi-account-logout" aria-hidden="true"></span> Cerrar sesion
+            </NavLink>
+        </div>
+ *@
+
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+    // private async Task CerrarSesion()
+    // {
+    //     var response = await http.PostAsync("api/Auth/logout", new StringContent(string.Empty));
+
+    //     if (response.IsSuccessStatusCode)
+    //     {
+    //         var authProviderService = authProvider as CustomAuthenticationStateProvider;
+    //         if (authProviderService != null)
+    //         {
+    //             await authProviderService.UpdateAuthenticationStateAsync();
+    //         }
+
+    //         // Redirige al usuario a la página de inicio después de cerrar la sesión
+    //         NavigationManager.NavigateTo("/logout");
+    //     }
+    //     else
+    //     {
+    //         // Maneja el error
+    //     }
+    // }
+
+}

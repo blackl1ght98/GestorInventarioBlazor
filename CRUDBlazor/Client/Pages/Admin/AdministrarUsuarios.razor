@@ -1,0 +1,165 @@
+﻿@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Admin
+@using Microsoft.AspNetCore.Authorization
+@inject HttpClient http
+@page "/administrarusuarios"
+@attribute [Authorize]
+<AuthorizeView Context="administrar" Roles="administrador">
+<h3>AdministrarUsuarios</h3>
+<div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+    @if (usuarios == null)
+    {
+        <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+        </div>
+    }
+    else
+    {
+        <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+        @foreach (var usuarios in usuarios)
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Datos del usuario</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Nombre Completo:</strong> @usuarios.nombreCompleto</p>
+                    <p class="card-text"><strong>Direccion:</strong> @usuarios.direccion</p>
+                    <p class="card-text"><strong>Telefono:</strong> @usuarios.telefono</p>
+                    <p class="card-text"><strong>Email:</strong> @usuarios.email</p>
+                    <p class="card-text"><strong>Fecha de Nacimiento:</strong> @usuarios.fechaNacimiento</p>
+                    <p class="card-text"><strong>Rol:</strong> @usuarios.idRolNavigation.nombre</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <div class="d-flex align-items-center">
+                            <!-- Cuando el formulario es enviado, se llama a la función de callback UpdateRole y se le pasa el usuario. -->
+                            <!-- ¿Qué es una función de callback? -->
+                            <!-- Una función de callback es una función que se pasa como argumento a otra función. Por ejemplo, 
+                            en (() => UpdateRole(usuarios)), estamos pasando la función UpdateRole como un callback a la función 
+                            anónima (() => ...). Un callback es una forma de asegurar que cierto código no se ejecute hasta que el otro haya 
+                            terminado. -->
+                            <!-- ¿Por qué se usa una función anónima? -->
+                            <!-- Las funciones anónimas son funciones que no tienen un nombre asociado. Se utilizan por varias razones. En este 
+                            caso, se utiliza para crear un nuevo scope y asegurar que la función UpdateRole se llame con el argumento 
+                            correcto (usuarios). Las funciones anónimas también son útiles cuando quieres declarar una función que será 
+                            utilizada una sola vez. -->
+                            <!-- OnValidSubmit: es una función de Blazor que se dispara cuando el formulario es válido y todos los campos 
+                            están rellenos. -->
+                            <!-- OnValidSubmit es un evento de Blazor que se dispara cuando se envía un formulario y todos los campos del 
+                            formulario han pasado las validaciones. En este caso, cuando se envía el formulario y todos los campos son válidos, 
+                            se llama a la función de callback que se ha especificado en OnValidSubmit. -->
+
+
+                        <EditForm Model="usuarios" OnValidSubmit="(() => UpdateRole(usuarios))" class="d-flex align-items-center">
+                            <div style="flex: 1; margin-right:0.5rem">
+                                <InputSelect @bind-Value="usuarios.newRol" class="form-control mr-2">
+                                    <option value="Selecciona un rol">Selecciona un rol</option>
+                                    @foreach (var rol in roles)
+                                    {
+                                        <option value="@rol.id">@rol.nombre</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <button type="submit" class="btn btn-info mt-2">Actualizar Rol</button>
+                        </EditForm>
+                    </div>
+                    <div>
+                        <a href="/deleteuseradmin/@usuarios.id" class="btn btn-danger mt-2 ml-2">Eliminar</a>
+                        <a href="/actualizarusuario/@usuarios.id" class="btn btn-primary mt-2 ml-2">Actualizar</a>
+                        <a href="/resetpassword/@usuarios.email" class="btn btn-primary mt-2 ml-2">Restaurar pass</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+<a href="/crearusuario" class="btn btn-info">Crear Usuario</a>
+</AuthorizeView>
+@code {
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo UserViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private UserViewModel nuevoUsuario = new UserViewModel();
+    // Creamos un array basado en UserViewModel para poder operar con él. Este array almacenará todos los usuarios obtenidos de
+    // la operación GET.
+    private UserViewModel[] usuarios;
+    // Creamos un array basado en RolViewModel para poder operar con él. Este array almacenará todos los roles obtenidos de
+    // la operación GET.
+    private RolViewModel[] roles;
+    private int paginaActual = 1;
+    private int paginasTotales;
+    //En cuanto la pagina se carga se ejecuta la funcion OnInitializedAsync
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await GetUsuarios();
+        roles = await GetRoles();
+        //Rellena el desplegable de roles
+        foreach (var user in usuarios)
+        {
+            user.newRol = user.idRol;
+        }
+    }
+    //Metodo para obtener todos los usuario
+    private async Task<UserViewModel[]> GetUsuarios(int pagina = 1, int cantidadRegistrosAMostrar = 1)
+    {
+        //Se realiza una peticion al servidor esta peticion esta asi debido a la paginacion porque esta url tiene la pagina donde esta mas la 
+        //cantidad de registros que se muestra
+        var response = await http.GetAsync($"api/Admin?pagina={pagina}&CantidadAMostrar={cantidadRegistrosAMostrar}");
+        if (response.IsSuccessStatusCode)
+        {
+            //Si la peticion ha ido bien devuelve el total de paginas
+            paginasTotales = int.Parse(response.Headers.GetValues("totalPaginas").FirstOrDefault());
+            Console.WriteLine($"Paginas totales después de obtener usuarios: {paginasTotales}");
+        }
+        //Lee y serializa el contenido de la respuesta del servidor
+        var content = await response.Content.ReadAsStringAsync();
+        //Muestra al usuario la informacion
+        return JsonSerializer.Deserialize<UserViewModel[]>(content);
+    }
+    //Cuando le damos a boton eliminar nos redirige a la vista de eliminacion que muestra informacion del usuario a eliminar
+    private async Task EliminarUsuario(int id) 
+    {
+        //Realiza la peticion al servidor para mostrar la vista
+        var resultado = await http.DeleteAsync($"api/Admin/deleteConfirmed/{id}");
+        usuarios = await GetUsuarios(); 
+    }
+    //Metodo que obtiene los roles
+    private async Task<RolViewModel[]> GetRoles()
+    {
+        //Realiza la peticion al servidor
+        var response = await http.GetAsync("api/Admin/roles");
+        //Lee y serializa la respuesta
+        var content = await response.Content.ReadAsStringAsync();
+        //Muestra la informacion al usuario
+        return JsonSerializer.Deserialize<RolViewModel[]>(content);
+    }
+    //Metodo que se llama cuando se le da al boton actualizar rol
+    private async Task UpdateRole(UserViewModel user)
+    {
+        //Antes de pasar la peticion al servidor se le pasa el rol
+        var updateRoleModel = new UpdateRoleViewModel { NewRole = user.newRol };
+        //Realiza la peticion al servidor y manda tambien el rol nuevo
+        var resultado = await http.PutAsJsonAsync($"api/Admin/updateRole/{user.id}", updateRoleModel);
+        usuarios = await GetUsuarios();
+        roles = await GetRoles();
+        await PaginaSeleccionada(paginaActual);
+    }
+    private async Task PaginaSeleccionada(int pagina)
+    {
+        Console.WriteLine($"Pagina seleccionada: {pagina}");
+        usuarios = await GetUsuarios(pagina);
+        paginaActual = pagina;
+        Console.WriteLine($"Pagina actual después de la selección: {paginaActual}");
+        roles = await GetRoles();
+        foreach (var user in usuarios)
+        {
+            user.newRol = user.idRol;
+        }
+    }
+}

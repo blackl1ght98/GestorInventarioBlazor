@@ -1,0 +1,71 @@
+﻿@page "/deleteuseradmin/{id}"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Admin
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+
+<h3>EliminarUsuario</h3>
+<p>Estás seguro que quieres eliminar al siguiente usuario?</p>
+<div>
+    <p><strong>Email:</strong> @usuario.email</p>
+    <p><strong>Nombre Completo:</strong> @usuario.nombreCompleto</p>
+    <p><strong>Fecha de Nacimiento:</strong> @usuario.fechaNacimiento</p>
+    <p><strong>Teléfono:</strong> @usuario.telefono</p>
+    <p><strong>Dirección:</strong> @usuario.direccion</p>
+</div>
+@if (showAlert)
+{
+    <div class="alert alert-danger" role="alert">
+        @alertMessage
+    </div>
+}
+<button @onclick="(()=>DeleteUser(usuario))" class="btn btn-danger">Eliminar Usuario</button>
+@code {
+    //En la url se pasa como parametro la id del usuario como la url es string tiene la id que ser string en el controlador ponemos que 
+        //espera un string y luego en el controlador lo convertimos a int
+    [Parameter]
+    public string id { get; set; }
+    private bool showAlert = false;
+    private string alertMessage = "";
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo UsuarioEditViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private UsuarioEditViewModel usuario = new UsuarioEditViewModel();
+    //En cuanto la pagina se carga se ejecuta este metodo OnInitializedAsync
+    protected override async Task OnInitializedAsync()
+    {
+        //Realiza la peticion al servidor
+        var response = await http.GetAsync($"api/Admin/user/{id}");
+        //Lee y serializa la respuesta del servidor
+        var content = await response.Content.ReadAsStringAsync();
+        //Deserializa la respuesta del servidor para que el usuario pueda ver la informacion
+        usuario = JsonSerializer.Deserialize<UsuarioEditViewModel>(content);
+    }
+    //Cuando hacemos clic en el boton eliminar usuario llama a este metodo
+    private async Task DeleteUser(UsuarioEditViewModel miusuario)
+    {
+        //Realiza la peticion al servidor
+        var resultado = await http.DeleteAsync($"api/Admin/deleteConfirmed/{miusuario.id}");
+        if (resultado.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+
+
+}

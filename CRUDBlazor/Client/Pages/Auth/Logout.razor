@@ -1,0 +1,29 @@
+﻿@page "/logout"
+@using System.Text.Json
+@using System.Text
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+
+<div class="text-center">
+    <h3>¡Hasta pronto!</h3>
+    <p>Gracias por visitarnos. Esperamos verte de nuevo pronto.</p>
+    <p>Redirigiendo a la página de inicio en <strong>@secondsLeft</strong> segundos...</p>
+</div>
+@code {
+    private int secondsLeft = 5;
+    //Este metodo se ejecuta en cuanto la pagina se carga
+    protected override async Task OnInitializedAsync()
+    {
+        //Este bucle for basicamente es un contrado cuando i llegue a 5 entonces reedirige a la pagina principal
+        for (int i = 0; i < 5; i++)
+        {
+            //Crea una tarea que tarda 1 segundo en ejecutarse esto quiere decir que el contador baja de 1 en 1.
+            await Task.Delay(1000);
+            secondsLeft--;
+            //Esto es lo que hace que podamos ver ese cambio en tiempo real
+            StateHasChanged();
+        }
+
+        NavigationManager.NavigateTo("/");
+    }
+}

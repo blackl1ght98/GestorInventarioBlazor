@@ -1,0 +1,34 @@
+﻿@page "/creardepartamento"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Departamento
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+
+<h3>Crear Departamento</h3>
+
+<EditForm Model="departamento" class="form-group">
+    <InputText @bind-Value=departamento.nombre class="form-control" placeholder="Nombre del departamento"></InputText>
+    <button @onclick="(()=>CreacionDepartamento(departamento))" class="btn btn-primary mt-2">Crear Departamento</button>
+</EditForm>
+
+@code {
+   
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo Departamento nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private Departamento departamento = new Departamento();
+
+   
+    //Cuando le das clic al boton crear departamento dirige a este metodo
+    private async Task CreacionDepartamento(Departamento midepartamento) 
+    {
+        //Hace la peticion post al servidor
+        var resultado = await http.PostAsJsonAsync($"api/Departamento", midepartamento);
+        NavigationManager.NavigateTo("/");
+    }
+}

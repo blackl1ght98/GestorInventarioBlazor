@@ -1,0 +1,88 @@
+﻿@page "/deleteproducto/{id}"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Productos
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+<h3>EliminarProducto</h3>
+<p>Estás seguro que quieres eliminar al siguiente producto?</p>
+
+<div>
+    <p><strong>Nombre Producto:</strong> @producto.nombreProducto</p>
+    <p><strong>Cantidad :</strong> @producto.cantidad</p>
+
+    <p><strong>Precio:</strong> @producto.precio</p>
+</div>
+@if (showAlert)
+{
+    <div class="alert alert-danger" role="alert">
+        @alertMessage
+    </div>
+}
+<button @onclick="(()=>DeleteProducto(producto))" class="btn btn-danger">Eliminar Producto</button>
+
+@code {
+    /*IMPORTANTE: 
+     * EL NOMBRE QUE PONGAS EN EL ENDPOINT Y AQUI DEBEN SER IGUALES SI EN EL ENDPOINT TIENES DELETEPRODUCTO
+     * AQUI DEBE SER IGUAL EL MOTIVO ES PARA FACILITAR EL SEGUIMIENTO Y DETECTAR POSIBLES ERRORES.
+     * LA RUTA AL ENDPOINT SIEMPRE ES api/CONTROLLER/{PARAMETRO}, EL PARAMETRO PUEDE O NO HABER
+     * LAS OPERACIONES POST,PUT Y DELETE EL ID SIEMPRE BLAZOR LO MANDARA COMO STRING EN LAS GET NO OCURRE
+     * SI SE NECESITA OBTENER INFORMACION CUANDO LA PAGINA SE CARGA ES IMPRESCINDIBLE PONER
+     *  protected override async Task OnInitializedAsync(){}
+     * PARA COMPROBAR SI LO QUE DEVUELVE UNA API LO HA DEVUELTO CON UN CODIGO DE EXITO SE PONE
+     *  if (response.IsSuccessStatusCode){} 
+     */
+    //Se pasa la id del producto como parametro en la url el motivo por el que es string es por que la url es un string de modo que tiene que ser
+    //string luego en el enpoint lo conviertes a numero y listo
+    [Parameter]
+    public string id { get; set; }
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo ProductosViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private ProductosViewModel producto = new ProductosViewModel();
+    private bool showAlert = false;
+    private string alertMessage = "";
+    //Esta funcion OnInitializedAsync se encarga de cargar cualquier cosa que pongas al cargar la pagina es muy util para mostrar informacion de 
+    //operaciones get
+    protected override async Task OnInitializedAsync()
+    {
+        //Hacemos una peticion al servidor para obtener el producto por id
+        var response = await http.GetAsync($"api/Producto/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            //si la peticion viene bien se procede a deserializar el json y mostrar la informacion
+            var content = await response.Content.ReadAsStringAsync();
+            producto = JsonSerializer.Deserialize<ProductosViewModel>(content);
+        }
+        else
+        {
+            var message = await response.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    //Esta funcion se llama cuando le damos al boton "Eliminar Producto".
+    private async Task DeleteProducto(ProductosViewModel producto)
+    {
+        //Realiza la peticion al servidor para eliminar un producto
+        var resultado = await http.DeleteAsync($"api/Producto/{producto.id}");
+        if (resultado.IsSuccessStatusCode)
+        {
+            //si todo va bien redirige a productos
+            NavigationManager.NavigateTo("/productos");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+}

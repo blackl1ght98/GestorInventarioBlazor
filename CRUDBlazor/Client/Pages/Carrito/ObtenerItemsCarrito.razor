@@ -1,0 +1,127 @@
+﻿@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Carrito
+@inject HttpClient http
+@page "/carritoitems"
+@inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
+
+<h3>Carrito</h3>
+<div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+    @if (showAlert)
+    {
+        <div class="alert alert-warning" role="alert">
+            @alertMessage
+        </div>
+    }
+    @if (itemsCarrito != null && itemsCarrito.Length > 0)
+    {
+        @foreach (var item in itemsCarrito)
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Datos del Producto</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Nombre Producto:</strong> @item.producto.nombreProducto</p>
+                    <p class="card-text"><strong>Precio:</strong> @item.producto.precio</p>
+                    <p class="card-text"><strong>Cantidad :</strong>@item.cantidad</p>
+                    <p class="card-text"><strong>Precio total:</strong>@(item.producto.precio*item.cantidad)</p>
+                </div>
+            </div>
+        }
+    }
+    <button @onclick="CrearItemsCarrito" disabled="@(itemsCarrito == null || itemsCarrito.Length == 0)">Crear Pedido</button>
+</div>
+
+@code {
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo ItemsCarrito nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    // Creamos un array basado en ItemsCarrito para poder operar con él. Este array almacenará todos los productos del carrito obtenidos de
+    // la operación GET.
+    private ItemsCarrito[] itemsCarrito;
+    private ObtencionItemsCarrito[] obtencionItemsDelCarrito;
+    private bool showAlert = false;
+    private string alertMessage = "";
+  
+    //Este metodo se inicia cuando la pagina se carga
+    protected override async Task OnInitializedAsync()
+    {
+        //Hace la peticion al servidor
+        var response = await http.GetAsync($"api/Carrito");
+        Console.WriteLine("Los items del carrito son" + response);
+        //Lee y serializa la peticion
+        var content = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("El contenido del carrito es" + content);
+        //Comprueba si la respuesta es un JSON válido
+        if (IsValidJson(content))
+        {
+            //Deserializa la peticion y la muestra al usuario
+            itemsCarrito = JsonSerializer.Deserialize<ItemsCarrito[]>(content);
+        }
+        else
+        {
+            itemsCarrito = new ItemsCarrito[0];
+            ShowAlert("No hay productos en el carrito");
+        }
+    }
+    private async Task CrearItemsCarrito()
+    {
+        var jsonProducto = JsonSerializer.Serialize(obtencionItemsDelCarrito);
+        var contenido = new StringContent(jsonProducto, Encoding.UTF8, "application/json");
+
+        var resultado = await http.PostAsync("api/Carrito/", contenido);
+
+        if (resultado.IsSuccessStatusCode)
+        {
+            var approvalUrl = await resultado.Content.ReadAsStringAsync();
+            // Redirige al usuario a la URL de PayPal
+            await jsRuntime.InvokeVoidAsync("window.open", approvalUrl, "_blank");
+        }
+        else
+        {
+            Console.WriteLine("Error al crear el producto");
+            // Aquí puedes manejar el error como mejor te parezca
+        }
+    }
+
+
+    private bool IsValidJson(string strInput)
+    {
+        strInput = strInput.Trim();
+        if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
+            (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
+        {
+            try
+            {
+                var obj = JsonSerializer.Deserialize<object>(strInput);
+                return true;
+            }
+            catch
+            {
+                //Invalid json, handle the exception as you need
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    private void ShowAlert(string message)
+    {
+        InvokeAsync(() =>
+        {
+            showAlert = true;
+            alertMessage = message;
+            StateHasChanged();
+        });
+    }
+
+}

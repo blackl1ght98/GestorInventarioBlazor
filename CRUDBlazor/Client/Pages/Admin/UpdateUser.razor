@@ -1,0 +1,70 @@
+﻿@page "/actualizarusuario/{id}"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Admin
+@using System.Text
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+
+<h3>Actualizar Usuario</h3>
+
+<EditForm Model="usuario" class="form-group">
+    <label>Email: </label>
+    <InputText @bind-Value=usuario.email @bind-Value:event="oninput" class="form-control" placeholder="Introduzca el email del usuario"></InputText>
+    <label>Nombre Completo: </label>
+    <InputText @bind-Value=usuario.nombreCompleto @bind-Value:event="oninput" class="form-control" placeholder="Introduzca el nombre del usuario"></InputText>
+    <label>Fecha de Nacimiento: </label>
+    <InputDate @bind-Value=usuario.fechaNacimiento class="form-control" placeholder="Introduzca la fecha de nacimiento del usuario"></InputDate>
+    <label>Telefono: </label>
+    <InputText @bind-Value=usuario.telefono @bind-Value:event="oninput" class="form-control" placeholder="Introduzca el telefono del usuario"></InputText>
+    <label>Direccion</label>
+    <InputText @bind-Value=usuario.direccion @bind-Value:event="oninput" class="form-control" placeholder="Introduzca la direccion del usuario"></InputText>
+    <button @onclick="(()=>ActualizarUsuario(usuario))" class="btn btn-primary mt-2">Actualizar Usuario</button>
+</EditForm>
+
+
+@code {
+    //A la ruta le pasamos el id del usuario a actualizar como la url es string la id se la tenemos que pasar como string y luego en el 
+    //controlador lo convertimos a int
+    [Parameter]
+    public string id { get; set; }
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo UsuarioEditViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private UsuarioEditViewModel usuario = new UsuarioEditViewModel();
+    //Cuando la pagina se carga se ejecuta este metodo OnInitializedAsync
+    protected override async Task OnInitializedAsync()
+    {
+        //Realiza la peticion al servidor
+        var response = await http.GetAsync($"api/Admin/user/{id}");
+        //Lee y serializa la respuesta
+        var content = await response.Content.ReadAsStringAsync();
+        //Muestra la informacion al usuario
+        usuario = JsonSerializer.Deserialize<UsuarioEditViewModel>(content);
+    }
+    //Este metodo se ejecuta cuando le das al boton actualizar usuario
+    // private async Task ActualizarUsuario(UsuarioEditViewModel miusuario)
+    // {
+    //     //realiza la peticion al servidor pasando la id de usuario mas la informacion a actualizar
+    //     var resultado = await http.PutAsJsonAsync($"api/Admin/{miusuario.id}", miusuario);
+    //     NavigationManager.NavigateTo("/");
+    // }
+    private async Task ActualizarUsuario(UsuarioEditViewModel miusuario)
+    {
+        var usuario = JsonSerializer.Serialize(miusuario);
+        Console.WriteLine("usuario" + usuario);
+        var contenido = new StringContent(usuario, Encoding.UTF8, "application/json");
+        Console.WriteLine("Actualizacion usuario "+ contenido);
+        var resultado = await http.PutAsync($"api/Admin/{miusuario.id}", contenido);
+        Console.WriteLine("Peticion Actualizacion" + resultado);
+        if (resultado.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Pedido actualizado con éxito");
+            NavigationManager.NavigateTo("/administrarusuarios");
+        }
+    }
+}

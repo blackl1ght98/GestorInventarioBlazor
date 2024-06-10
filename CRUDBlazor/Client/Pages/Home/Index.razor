@@ -1,0 +1,29 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<h1>Bienvenidos a mi pagina</h1>
+<AuthorizeView >
+    <Authorized >
+        <h3>Welcome, @userName!</h3>
+        <h4>Your role is: @userRole</h4>
+        <h4>Your email is: @userEmail</h4>
+
+    </Authorized>
+    <NotAuthorized>
+        <h3>Sorry, you're not authorized to view this page.</h3>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    private string userName;
+    private string userRole;
+    private string userEmail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        userName = authState.User.Claims.FirstOrDefault(c=>c.Type==ClaimTypes.Name)?.Value;
+        userRole = authState.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+        userEmail = authState.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+    }
+}

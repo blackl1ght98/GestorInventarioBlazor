@@ -1,0 +1,73 @@
+﻿@page "/login"
+@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Auth
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider authProvider
+<h3>Autenticacion</h3>
+<EditForm Model="usuario" class="form-group">
+    <label>Email: </label>
+    <!--En blazor es importante el orden en el que colocas el enlace de datos si ha ese enlace de datos necesitas ponerle un evento
+        tiene que ir despues de bind-value
+    -->
+    <InputText @bind-Value="usuario.email"  class="form-control" placeholder="Introduzca su email" />
+    <label>Password: </label>
+    <!--Por defecto, Blazor actualiza el valor enlazado de un campo de entrada cuando el campo pierde el foco. Esto se conoce como el evento 
+    onchange. Sin embargo, si deseas que Blazor actualice el valor enlazado con cada pulsación de tecla, puedes cambiar el evento de enlace a 
+    oninput.
+   cuando usas bind-value=usuario.password, Blazor está utilizando el evento onchange por defecto. Esto significa que el valor de 
+   usuario.password no se actualiza hasta que el campo de contraseña pierde el foco. Si intentas autenticar antes de que el campo pierda el 
+   foco, usuario.password podría no tener el valor más reciente.
+    Cuando cambias a bind-value:event="oninput", le estás diciendo a Blazor que actualice usuario.password con cada pulsación de tecla. Esto 
+    asegura que usuario.password siempre tenga el valor más reciente, independientemente de si el campo de contraseña ha perdido el foco o no.
+    -->
+    <input type="password" @bind-value=usuario.password @bind-value:event="oninput" class="form-control" placeholder="Introduzca su password" />
+    <button @onclick="(()=>Autenticar(usuario))" class="btn btn-primary mt-2">Login</button>
+    @if (showAlert)
+    {
+        <div class="alert alert-danger" role="alert">
+            @alertMessage
+        </div>
+    }
+</EditForm>
+
+@code {
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo LoginViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private LoginViewModel usuario = new LoginViewModel();
+    private bool showAlert = false;
+    private string alertMessage = "";
+    //Este metodo es llamado cuando haces clic en login
+    private async Task Autenticar(LoginViewModel miusuario)
+    {
+        //Realiza la peticion de autenticacion al servidor
+        var resultado = await http.PostAsJsonAsync($"api/Auth/login", miusuario);
+        if (resultado.IsSuccessStatusCode)
+        {
+            //Actualiza el estado de autenticacion del usuario
+            var authProviderService = authProvider as CustomAuthenticationStateProvider;
+            if (authProviderService != null)
+            {
+                await authProviderService.UpdateAuthenticationStateAsync();
+            }
+            NavigationManager.NavigateTo("/productos");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+}

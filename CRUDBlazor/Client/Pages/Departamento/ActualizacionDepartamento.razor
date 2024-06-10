@@ -1,0 +1,72 @@
+﻿@page "/actualizardepartamento/{idDepartamento}"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Departamento
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+
+<h3>Actualizar Departamento</h3>
+
+<EditForm Model="departamento" class="form-group">
+    <!--Con bind-value accede al valor de la clase Departamento concretamente al nombre-->
+    <InputText @bind-Value=departamento.nombre class="form-control" placeholder="Nombre del departamento"></InputText>
+    <!--Se llama a la funcion de actualizacion pasandole el departamento-->
+    @if (showAlert)
+    {
+        <div class="alert alert-danger" role="alert">
+            @alertMessage
+        </div>
+    }
+    <button @onclick="(()=>ActualizarDepartamentod(departamento))" class="btn btn-primary mt-2">Actualizar Departamento</button>
+</EditForm>
+
+
+@code {
+    //Como la url es string pues los parametros que queramos poner en la url tiene que ser string pues como para actualizar un departamento
+    //necesitamos la id pues se la pasamos como string y luego en el controlador lo convertimos a int
+    [Parameter]
+    public string idDepartamento { get; set; }
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo Departamento nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private Departamento departamento = new Departamento();
+    private bool showAlert = false;
+    private string alertMessage = "";
+    //Este componente se inicia al comienzo de que carga la pagina
+    protected override async Task OnInitializedAsync()
+    {
+        //Hace una get al servidor
+        var response = await http.GetAsync($"api/Departamento/{idDepartamento}");
+        //Lee la respuesta del servidor y la serializa
+        var content = await response.Content.ReadAsStringAsync();
+        //Deserializa la respuesta del servidor y muestra la informacion al usuario
+        departamento = JsonSerializer.Deserialize<Departamento>(content);
+    }
+    //Cuando hacemos clic en el boton "Actualizar Departamento" llama a este metodo
+    private async Task ActualizarDepartamentod(Departamento midepartamento) 
+    {
+      //Realizamos la peticion al servidor pasando la id del departamento mas la informacion que se alla actualizado
+        var resultado = await http.PutAsJsonAsync($"api/Departamento/{midepartamento.idDepartamento}", midepartamento);
+        if (resultado.IsSuccessStatusCode)
+        {
+            
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+            
+        }
+
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+}

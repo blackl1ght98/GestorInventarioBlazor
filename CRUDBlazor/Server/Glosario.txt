@@ -1,0 +1,108 @@
+/*
+ ¿Que es AddScope, AddTransient y AddSingleton?
+Estos son métodos que se utilizan en ASP.NET Core para registrar servicios con diferentes tiempos de vida 
+en el contenedor de inyección de dependencias:
+
+    AddTransient: Este método registra un servicio con un tiempo de vida “transitorio”. Esto significa que 
+    se crea una nueva instancia del servicio cada vez que se solicita. Es útil para servicios que son ligeros y 
+    no mantienen ningún estado entre las solicitudes.
+
+    AddScoped: Este método registra un servicio con un tiempo de vida “scoped” o limitado al alcance. 
+    Esto significa que se crea una nueva instancia del servicio para cada solicitud HTTP. Todos los que estén 
+    en la misma solicitud compartirán la misma instancia del servicio. Es útil para situaciones en las que 
+    varias operaciones dentro de una sola solicitud necesitan compartir el mismo contexto, como en el caso 
+    de las operaciones de base de datos con Entity Framework.(Operaciones con base de datos)
+
+    AddSingleton: Este método registra un servicio con un tiempo de vida “singleton”. Esto significa que 
+    se crea una única instancia cuando la aplicación arranca y esa misma instancia se comparte con todas las 
+    solicitudes y servicios durante toda la vida de la aplicación. Es útil para servicios que necesitan mantener 
+    un estado constante entre las solicitudes, como un servicio de configuración que lee un archivo y 
+    proporciona valores durante toda la ejecución de tu aplicación
+ */
+/*¿Cuando se usan los metodos anteriores?
+ * Usar AddTransient para todo puede funcionar en algunos casos, especialmente si tus servicios son 
+ * sin estado y no mantienen ninguna información entre las solicitudes. Sin embargo, si tus servicios 
+ * necesitan mantener el estado o compartir datos entre diferentes partes de tu aplicación durante una 
+ * sola solicitud o durante toda la vida de la aplicación, entonces AddTransient podría no ser la mejor 
+ * opción.
+
+    Aquí te dejo una guía general:
+
+    Usa AddTransient para servicios sin estado.
+    Usa AddScoped para servicios que necesitan mantener el estado durante una única solicitud.
+    Usa AddSingleton para servicios que necesitan mantener el estado durante toda la vida de la aplicación.
+
+ */
+/*¿Que significa que un servicio tiene estado:
+ Cuando decimos que un servicio “tiene estado”, nos referimos a que el servicio mantiene cierta 
+información o datos entre las solicitudes. Esta información se conoce como “estado”.
+
+Por ejemplo, considera un servicio de carrito de compras en una tienda en línea. Este servicio 
+podría mantener un estado que incluye los artículos que un usuario ha agregado a su carrito. A 
+medida que el usuario navega por la tienda y agrega o elimina artículos del carrito, el estado del 
+servicio de carrito de compras se actualiza.
+
+En contraste, un servicio “sin estado” no mantiene ninguna información entre las solicitudes. Cada 
+solicitud se maneja de forma independiente sin referencia a las solicitudes anteriores. Un ejemplo de 
+un servicio sin estado podría ser un servicio que realiza cálculos matemáticos. No importa cuántas veces 
+llames a este servicio, cada cálculo es independiente de los demás.
+ 
+ */
+ /*El orden de los middlewares en ASP.NET Core es muy importante porque define el orden en el que 
+ * se procesan las solicitudes HTTP.
+
+El middleware app.UseRouting() debe ir antes que app.UseAuthentication() y app.UseAuthorization() por 
+las siguientes razones:
+
+    Enrutamiento: app.UseRouting() es responsable de decidir qué código manejará cada solicitud HTTP. 
+En otras palabras, determina qué endpoint (controlador de acción o función de middleware) se invocará 
+para una solicitud entrante.
+
+    Autenticación: Una vez que se ha determinado el endpoint, el middleware app.UseAuthentication() 
+puede autenticar al usuario para esa solicitud. La autenticación es el proceso de identificar quién 
+es el usuario.
+
+    Autorización: Después de que el usuario ha sido autenticado, app.UseAuthorization() puede autorizar 
+    al usuario para el endpoint. La autorización es el proceso de decidir si un usuario autenticado tiene 
+    permiso para acceder a un recurso específico.
+
+Por lo tanto, necesitamos saber a qué endpoint se dirige una solicitud (enrutamiento) antes de que podamos 
+autenticar o autorizar al usuario para ese endpoint. De ahí que app.UseRouting() deba ir antes que 
+app.UseAuthentication() y app.UseAuthorization()
+ */
+/*La autenticación y la autorización son dos conceptos fundamentales en la seguridad de las aplicaciones, 
+ * pero tienen roles distintos:
+
+    Autenticación: Es el proceso de verificar la identidad de un usuario. Cuando un usuario intenta acceder 
+    a un sistema, la autenticación es el paso que asegura que el usuario es quien dice ser. Esto se hace 
+    generalmente solicitando credenciales como un nombre de usuario y una contraseña. Si las credenciales 
+    coinciden con lo que está almacenado en el sistema, el usuario se autentica y se le permite acceder.
+
+    Autorización: Una vez que un usuario está autenticado, la autorización determina qué recursos o acciones 
+    tiene permitido acceder o realizar el usuario en el sistema. Por ejemplo, un usuario puede estar autorizado 
+    para ver un recurso, pero no para modificarlo. La autorización se aplica después de la autenticación y 
+    controla los niveles de acceso.
+
+    En resumen, la autenticación es el proceso de verificar quién eres, mientras que la autorización es el 
+    proceso de verificar qué tienes permitido hacer.
+ */
+ En Blazor WebAssembly, un servicio registrado con AddScoped tiene un tiempo de vida que dura desde que el usuario carga la aplicación en 
+ su navegador hasta que cierra la página o la recarga. Es decir, dura toda la “sesión” de la aplicación.
+
+En ASP.NET MVC, un servicio registrado con AddScoped tiene un tiempo de vida que dura solo durante una única solicitud HTTP.
+Es decir, se crea una nueva instancia del servicio para cada solicitud HTTP y se desecha al final de esa solicitud.
+
+Singleton: Cuando registras un servicio con AddSingleton, se crea una única instancia del servicio cuando se solicita por primera vez, 
+y luego esa misma instancia se reutiliza en todas las solicitudes posteriores durante toda la vida de la aplicación. Esto significa que todos 
+los controladores, vistas y otros componentes compartirán la misma instancia del servicio, sin importar cuántas solicitudes HTTP se hagan o 
+cuántas sesiones de la aplicación se inicien. Este tiempo de vida es útil para servicios que mantienen un estado que necesita ser compartido 
+entre diferentes partes de tu aplicación.
+
+Transient: Cuando registras un servicio con AddTransient, se crea una nueva instancia del servicio cada vez que se solicita. Esto significa 
+que cada controlador, vista u otro componente obtendrá su propia instancia separada del servicio. Este tiempo de vida es útil para servicios 
+que no mantienen ningún estado entre las solicitudes.
+
+
+Transient: Una nueva instancia se crea cada vez que se solicita el servicio.
+Scoped: Una nueva instancia se crea por cada solicitud HTTP (en MVC) o por cada sesión de la aplicación (en Blazor).
+Singleton: Una única instancia se crea y se reutiliza en todas las solicitudes durante toda la vida de la aplicación

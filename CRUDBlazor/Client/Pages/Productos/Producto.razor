@@ -1,0 +1,170 @@
+﻿@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Productos
+@inject HttpClient http
+@page "/productos"
+<h3>Producto</h3>
+<div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+    @if (productos == null)
+    {
+        <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+        </div>
+    }
+    else
+    {
+        <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+        @foreach (var producto in productos)
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Datos del Producto</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Nombre Producto:</strong> @producto.nombreProducto</p>
+                    <p class="card-text"><strong>Descripcion:</strong> @producto.descripcion</p>
+                    <p class="card-text">
+                        <strong>Imagen:</strong> <br/><img src="@producto.imagen" alt="Imagen del producto" style="width:100px; height:100px;" />
+                    </p>
+                    <p class="card-text"><strong>Cantidad:</strong> @producto.cantidad</p>
+
+                    <p class="card-text"><strong>Precio:</strong> @producto.precio</p>
+                    <p class="card-text"><strong>Nombre del proveedor:</strong> @producto.idProveedorNavigation.nombreProveedor</p>
+
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+
+                    <div>
+                        <AuthorizeView Roles="administrador">
+                        <a href="/deleteproducto/@producto.id" class="btn btn-danger mt-2 ml-2">Eliminar</a>
+                        </AuthorizeView>
+                        <AuthorizeView Roles="administrador">
+                        <a href="/actualizarproducto/@producto.id" class="btn btn-primary mt-2 ml-2">Actualizar</a> 
+                        </AuthorizeView>
+              </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <div>
+                            <input type="number" @bind="cantidades[producto.id]" min="1" max="@producto.cantidad" />
+                            <button class="btn btn-primary mt-2" @onclick="() => AgregarAlCarrito(producto.id)">Agregar al carrito</button>
+
+                        </div>
+                       
+
+                    </div>
+                    @if (showAlert)
+                    {
+                        <div class="alert alert-danger mt-2" role="alert">
+                            @alertMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+<a href="/crearproducto" class="btn btn-info">Crear Producto</a>
+@code {
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo ProductosViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private ProductosViewModel producto = new ProductosViewModel();
+    // Crea un array de productos para poder mostrarlos en la interfaz de usuario.
+    private ProductosViewModel[] productos;
+    // Configuración para agregar la paginación. Esto permite al usuario navegar a través de las páginas de productos.
+    private Paginacion paginacion = new Paginacion();
+    // Crea un diccionario que almacena las cantidades de cada producto que se añade al carrito. El número inicial es 1 porque esta es 
+    // la cantidad predeterminada.
+    private Dictionary<int, int> cantidades = new Dictionary<int, int>();
+    // Configuración para agregar la paginación. Estas variables mantienen un seguimiento de la página actual, el total de páginas.
+    private int paginaActual = 1;
+    private int paginasTotales;
+    //Mostrar el mensaje de error
+    private bool showAlert = false;
+    private string alertMessage = "";
+   
+    protected override async Task OnInitializedAsync()
+    {
+        //Al array que inicialmete esta vacio se le asigna los productos que debe mostrar
+        productos = await GetProducto();
+        foreach (var producto in productos)
+        {
+            //Este es el motivo por el cual la funcion de "Agregar al carrito" esta inicializado en 1. 
+            //pero a esto hay que decirle a que productos le pertenece esa cantidad por ello se le pasa la id de cada producto
+            //Gracias al foreach se le asigna a cada producto que exista en base de datos.
+            cantidades[producto.id] = 1; 
+        }
+
+    }
+    private async Task<ProductosViewModel[]> GetProducto()
+    {
+        /*El motivo por el cual la url quera asi es porque a esa url se le pasa una consulta y esta
+         * consulta es para decirle al controlador que pagina tiene que mostrar y que cantidad de registros
+        */
+       //Realiza una peticion get al servidor
+        var response = await http.GetAsync($"api/Producto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}");
+        //Si la respuesta es valida...
+        if (response.IsSuccessStatusCode)
+        {
+            //Muestra el numero de paginas totales
+            paginasTotales = int.Parse(response.Headers.GetValues("totalPaginas").FirstOrDefault());
+            Console.WriteLine($"Paginas totales después de obtener usuarios: {paginasTotales}");
+        }
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<ProductosViewModel[]>(content);
+    }
+    private async Task PaginaSeleccionada(int pagina)
+    {
+        Console.WriteLine($"Pagina seleccionada: {pagina}");
+        paginacion.Pagina = pagina;
+        productos = await GetProducto();
+        //El motivo por el que se pone este forech aqui es para mostrar la cantidad de la funcion de "Agregar producto" de los productos de 
+        //la pagina siguiente
+        foreach (var producto in productos)
+        {
+            //Si no contiene la id de los productos de la pagina anterior
+            if (!cantidades.ContainsKey(producto.id))
+            {
+                //Actualiza y muestrame la cantidad de productos de la pagina siguiente
+                cantidades[producto.id] = 1; 
+            }
+        }
+        //devuelve la pagina actual en la que se encuentra el usuario
+        paginaActual = pagina;
+        Console.WriteLine($"Pagina actual después de la selección: {paginaActual}");
+    }
+    private async Task AgregarAlCarrito(int idProducto)
+    {
+        // Obtiene la cantidad del diccionario 'cantidades' para pasar esas cantidades al carrito
+        int cantidad = cantidades[idProducto];
+        //Aqui tenemos una peticion un tanto especial como al json de la peticion necesitamos pasarle unas propiedades, pues con esta linea
+        //le ponemos las propiedades que queremos que tenga la peticion antes de hacerla en este caso para agregar un producto al carrito
+        //necesitamos la idProducto para saber que producto se agrego y la cantidad de ese producto esto lo transforma a json.
+        var content = new StringContent(JsonSerializer.Serialize(new { idProducto, cantidad }), Encoding.UTF8, "application/json");
+        Console.WriteLine("el id del producto es " + idProducto + "y su cantidad es " + cantidad);
+        Console.WriteLine("este es el contenido agregar carrito:" + content);
+        //Hace la peticion al servidor pasandole la idProducto y cantidad anteriormente serializada
+        var response = await http.PostAsync("api/Producto/carrito", content);
+        if (response.IsSuccessStatusCode)
+        {
+            //Si el producto se agrego correctamente muestra los productos con el nuevo producto
+            productos = await GetProducto();
+        }
+        else
+        {
+            //Si ha ocurrido un error muestra el mensaje de error
+            var message = await response.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+
+}

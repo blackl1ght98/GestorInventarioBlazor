@@ -1,0 +1,134 @@
+﻿@page "/crearproducto"
+@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Productos
+@using CRUDBlazor.Shared.Proveedores
+@inject HttpClient http
+
+@inject NavigationManager NavigationManager
+<h3>Crear Producto</h3>
+
+<EditForm Model="producto" OnValidSubmit="CreacionProducto" class="form-group">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>Nombre Producto: </label>
+    <InputText @bind-Value=producto.nombreProducto class="form-control " placeholder="Nombre del producto" ></InputText>
+    <ValidationMessage For="@(() => producto.nombreProducto)" />
+    <label>Descripcion: </label>
+    <InputText @bind-Value=producto.descripcion class="form-control mt-2" placeholder="Descripcion del producto"></InputText>
+    <ValidationMessage For="@(() => producto.descripcion)" />
+    <label>Subir imagen: </label>
+    <InputFile OnChange="@OnInputFileChange" class="mt-2"></InputFile>
+    <img src="@($"data:{producto.TipoImagen};base64,{producto.imagen}")" alt="Imagen del producto" style="width:100px; height:100px" />
+
+    <br/>
+    <label>Cantidad: </label>
+ <InputNumber @bind-Value=producto.cantidad class="form-control mt-2 " placeholder="cantidad del producto"></InputNumber>
+    <ValidationMessage For="@(() => producto.cantidad)" />
+ <label>Precio: </label> 
+ <InputNumber @bind-Value=producto.precio class="form-control mt-2 " placeholder="precio del producto"></InputNumber>
+    <ValidationMessage For="@(() => producto.precio)" />
+ <label>Seleccione Proveedor: </label>
+ <InputSelect @bind-Value=producto.idProveedor class="form-control mt-2" >
+        
+        @foreach (var proveedor in proveedores)
+        {
+            <option value="@proveedor.id">@proveedor.nombreProveedor</option>
+        }
+    </InputSelect>
+    <button type="submit" class="btn btn-primary mt-2">Crear Proveedor</button></EditForm>
+@code {
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo ProductosViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private ProductosViewModel producto = new ProductosViewModel();
+    private ProveedorViewModel proveedor = new ProveedorViewModel();
+    // Creamos un array basado en ProveedorViewModel para poder operar con él. Este array almacenará todos los proveedores obtenidos de 
+    // la operación GET.
+    private ProveedorViewModel[] proveedores = new ProveedorViewModel[0];
+    private bool showAlert = false;
+    private string alertMessage = "";
+    // En OnInitializedAsync, obtenemos todos los proveedores y los asignamos a nuestro array. Si hay proveedores disponibles, 
+    // asignamos el ID del primer proveedor a nuestro producto.
+    protected override async Task OnInitializedAsync()
+    {
+        //Al array se le pasa los proveedores obtenidos por la operacion get
+        proveedores = await GetProveedores();
+        //Vemos si la id del proveedor es mayor a 0...
+        if (proveedores.Length > 0)
+        {
+            //asignamos el Id del primero proveedor a nuestro producto o el proveedor que seleccionemos
+            producto.idProveedor = proveedores[0].id;
+        }
+    }
+    //Como el get vamos a obtener un monton de proveedores esto se asigna a un array para poder recorrerlo y mostrarlo
+    private async Task<ProveedorViewModel[]> GetProveedores()
+    {
+        //Realizamos una peticion get al servidor 
+        var response = await http.GetAsync($"api/Proveedor");
+        Console.WriteLine("Esto es la respuesta:" + response);
+        var content = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("Esto es el contenido:" + content);
+        //Deserializamos la respuesta del servidor y la mostramos
+        return JsonSerializer.Deserialize<ProveedorViewModel[]>(content);
+    }
+    // OnInputFileChange se encarga del manejo de archivos. Cuando se selecciona un archivo, lo lee, lo convierte a un array de bytes, 
+    // lo codifica en base64 y guarda la información relevante en nuestro producto.
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+      
+        var imageFile = e.File;
+        if (imageFile != null)
+        {
+            
+           /*Gracias al MemoryStream podemos manejar la carga del archivo, memorystream carga la información necesaria en memoria
+            * para poder manejar el archivo
+            */
+            using var memoryStream = new MemoryStream();
+            //OpenReadStream-->Lee el archivo subido y comprueba que no supera la capacidad puesta
+            //y lo copia al memoryStream
+            await imageFile.OpenReadStream(maxAllowedSize: 6 * 1024 * 1024) 
+                .CopyToAsync(memoryStream);
+            //El contenido que esta en memoria lo transforma en un array.
+            var contenido = memoryStream.ToArray();
+            //Aqui se almacena el contenido del archivo en base64 se puede decir que es como "codificarlo" para que el ordenador lo entienda
+            producto.imagen = Convert.ToBase64String(contenido);
+            // Obtenemos la extension del archivo
+            var extension = Path.GetExtension(imageFile.Name);
+           //A la imagen que subimos al servidor le asignamos la extension pertinente 
+            producto.extension = extension;
+            producto.TipoImagen = imageFile.ContentType; // Guarda el tipo de imagen
+        }
+    }
+    private async Task CreacionProducto()
+    {
+        //Serializa a json el formulario que escribe el usuario, lo transforma en json
+        var jsonProducto = JsonSerializer.Serialize(producto);
+        //Crea un objeto StringContent que encapsula el json creado
+        var contenido = new StringContent(jsonProducto, Encoding.UTF8, "application/json");
+        //Una vez que se ha realizado esa encapsulacion lo manda al endpoint
+        var resultado = await http.PostAsync($"api/Producto", contenido);
+        if (resultado.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Producto creado con éxito");
+            NavigationManager.NavigateTo("/productos");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+       
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+
+}

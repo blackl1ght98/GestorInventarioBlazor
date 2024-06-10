@@ -1,0 +1,56 @@
+﻿@page "/anctualizarproveedor/{id}"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Proveedores
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+<h3>ActualizarProveedor</h3>
+<EditForm Model="proveedor" class="form-group">
+    <InputText @bind-Value=proveedor.nombreProveedor @bind-Value:event="oninput" class="form-control" placeholder="Nombre del proveedor"></InputText>
+    <InputText @bind-Value=proveedor.direccion @bind-Value:event="oninput" class="form-control" placeholder="direccion del proveedor"></InputText>
+    <InputText @bind-Value=proveedor.contacto @bind-Value:event="oninput" class="form-control" placeholder="contacto del proveedor"></InputText>
+    
+    <button @onclick="(()=>EditarProveedor(proveedor))" class="btn btn-primary mt-2">Actualizar Proveedor</button>
+</EditForm>
+
+@code {
+    //En la url pasa la id como un parametro.
+    /*¿Porque un string en la id si la id es un numero?
+     * El motivo por el cual es un string o cadena de texto es por como son las url, luego esto en el controlador en el servidor
+     * se recibe como string y se convierte a numero antes de hacer la consulta a base de datos
+    */
+    [Parameter]
+    public string id { get; set; }
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una 
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser 
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo ProveedorViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre" 
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private ProveedorViewModel proveedor = new ProveedorViewModel();
+
+    //La funcion OnInitializedAsync es una funcion exclusiva de blazor que todo lo que pongas dentro de esta funcion empieza a mostrarse en cuanto
+    //la aplicacion se inicia esto es muy utili para las operaciones get.
+    protected override async Task OnInitializedAsync()
+    {
+        //Realiza una peticion al servidor
+        var response = await http.GetAsync($"api/Proveedor/{id}");
+        //Serializa esa peticion en un json
+        var content = await response.Content.ReadAsStringAsync();
+        //la deserializa para que el cliente lo entienda
+        proveedor = JsonSerializer.Deserialize<ProveedorViewModel>(content);
+    }
+    //Esta funcion es llamada cuando le das al boton Actualizar proveedor
+    private async Task EditarProveedor(ProveedorViewModel proveedor)
+    {
+        //Realiza una peticion put a la api en base a la id del proveedor, y en base a esa id se permite la edicion de los demas campos
+        var resultado = await http.PutAsJsonAsync($"api/Proveedor/{proveedor.id}", proveedor);
+        if (resultado.IsSuccessStatusCode)
+        {
+            // Redirige al usuario a la página principal después de actualizar el departamento
+            NavigationManager.NavigateTo("/proveedores");
+        }
+       
+    }
+}

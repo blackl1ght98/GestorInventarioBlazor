@@ -1,0 +1,27 @@
+﻿<!--
+<CascadingAuthenticationState> es un componente de Blazor que proporciona un estado de autenticación a 
+    todos los componentes hijos en la jerarquía del componente. Este estado de autenticación incluye 
+    información sobre si el usuario actual está autenticado y, si es así, quién es.
+
+El componente <CascadingAuthenticationState> se utiliza en combinación con el servicio 
+    AuthenticationStateProvider para proporcionar el estado de autenticación actual. Cuando el estado de 
+    autenticación cambia (por ejemplo, cuando un usuario inicia o cierra sesión), AuthenticationStateProvider notifica a <CascadingAuthenticationState>, que a su vez actualiza todos los componentes hijos que consumen el estado de autenticación.
+
+Se coloca en App.razor porque este archivo define la disposición de alto nivel de la aplicación y los 
+componentes que se incluyen en todas las páginas. Al colocar <CascadingAuthenticationState> en App.razor, 
+    te aseguras de que el estado de autenticación esté disponible para todos los componentes en tu aplicación.
+-->
+<CascadingAuthenticationState>
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+</CascadingAuthenticationState>

@@ -1,0 +1,23 @@
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\bin\Debug\net7.0\CRUDBlazor.Shared.deps.json
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\bin\Debug\net7.0\CRUDBlazor.Shared.dll
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\bin\Debug\net7.0\CRUDBlazor.Shared.pdb
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.AssemblyInfoInputs.cache
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.AssemblyInfo.cs
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.csproj.CoreCompileInputs.cache
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.dll
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\refint\CRUDBlazor.Shared.dll
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.pdb
+C:\Users\guill\OneDrive\Escritorio\Glucontrol NO BORRAR\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\ref\CRUDBlazor.Shared.dll
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\bin\Debug\net7.0\CRUDBlazor.Shared.deps.json
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\bin\Debug\net7.0\CRUDBlazor.Shared.dll
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\bin\Debug\net7.0\CRUDBlazor.Shared.pdb
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.csproj.AssemblyReference.cache
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.AssemblyInfoInputs.cache
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.AssemblyInfo.cs
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.csproj.CoreCompileInputs.cache
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.dll
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\refint\CRUDBlazor.Shared.dll
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\CRUDBlazor.Shared.pdb
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Shared\obj\Debug\net7.0\ref\CRUDBlazor.Shared.dll

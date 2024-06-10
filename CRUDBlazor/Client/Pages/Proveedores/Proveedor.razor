@@ -1,0 +1,82 @@
+﻿@using System.Text.Json
+@using System.Text
+@using CRUDBlazor.Shared.Proveedores
+@inject HttpClient http
+@page "/proveedores"
+
+<h3>Proveedor</h3>
+<div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+    @if (proveedors == null)
+    {
+        <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+        </div>
+    }
+    else
+    {
+        <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+
+        @foreach (var proveedor in proveedors)
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Datos del Proveedor</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Nombre Proveedor:</strong> @proveedor.nombreProveedor</p>
+                    <p class="card-text"><strong>Contacto:</strong> @proveedor.contacto</p>
+                    <p class="card-text"><strong>Direccion:</strong> @proveedor.direccion</p>
+                    
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                   
+                    <div>
+                        <a href="/deleteproveedor/@proveedor.id" class="btn btn-danger mt-2 ml-2">Eliminar</a>
+                        <a href="/anctualizarproveedor/@proveedor.id" class="btn btn-primary mt-2 ml-2">Actualizar</a>
+                     </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+<a href="/crearproveedor" class="btn btn-info">Crear Proveedor</a>
+
+@code {
+    private ProveedorViewModel proveedor = new ProveedorViewModel();
+    private ProveedorViewModel[] proveedors;
+    private Paginacion paginacion = new Paginacion();
+    private int paginaActual = 1;
+    private int paginasTotales;
+    protected override async Task OnInitializedAsync()
+    {
+
+        proveedors = await GetProveedores();
+
+    }
+    private async Task<ProveedorViewModel[]> GetProveedores()
+    {
+        /*El motivo por el cual la url queda asi es porque a esa url se le pasa una consulta y esta
+         * consulta es para decirle al controlador que pagina tiene que mostrar y que cantidad de registros
+         */
+        var response = await http.GetAsync($"api/Proveedor?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}");
+        //Si response devuelv ok un 200 que quiere decir que la peticion es exitosa
+        if (response.IsSuccessStatusCode)
+        {
+            //va a la cabecera de la peticion y extrae el numero total de paginas que debe mostrar
+            paginasTotales = int.Parse(response.Headers.GetValues("totalPaginas").FirstOrDefault());
+            Console.WriteLine($"Paginas totales después de obtener usuarios: {paginasTotales}");
+        }
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<ProveedorViewModel[]>(content);
+    }
+    private async Task PaginaSeleccionada(int pagina)
+    {
+        Console.WriteLine($"Pagina seleccionada: {pagina}");
+        paginacion.Pagina = pagina;
+        proveedors = await GetProveedores();
+        paginaActual = pagina;
+        Console.WriteLine($"Pagina actual después de la selección: {paginaActual}");
+      
+
+    }
+}

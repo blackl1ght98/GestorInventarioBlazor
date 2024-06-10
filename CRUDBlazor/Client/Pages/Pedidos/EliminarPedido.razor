@@ -1,0 +1,78 @@
+﻿@page "/deletepedido/{id}"
+@using System.Text.Json
+@using CRUDBlazor.Shared.Pedidos
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+<h3>EliminarPedido</h3>
+<p>Estás seguro que quieres eliminar al siguiente pedido?</p>
+
+<div>
+    <p><strong>Numero Pedido:</strong> @pedido.numeroPedido</p>
+    <p><strong>Fecha pedido :</strong> @pedido.fechaPedido</p>
+    <p><strong>Estado Pedido:</strong> @pedido.estadoPedido</p>
+    <p><strong>Nombre del cliente del pedido:</strong> @((pedido.idUsuarioNavigation != null) ? pedido.idUsuarioNavigation.nombreCompleto : "Usuario no encontrado")</p>
+</div>
+@if (showAlert)
+{
+    <div class="alert alert-danger" role="alert">
+        @alertMessage
+    </div>
+}
+<button @onclick="(()=>DeletePedido(pedido))" class="btn btn-danger">Eliminar Pedido</button>
+@code {
+    //Se le pasa la id como parametro a la url, una url es string esto quiere decir que todo lo que en ella vaya tiene que ser string 
+    //pues ponemos que la id sea string y luego en el controlador le decimos que recibe un string pero antes de pasarlo a la consulta lo 
+    //convertimos a numero
+    [Parameter]
+    public string id { get; set; }
+    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
+    // manera que ambos puedan entender.
+    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
+    // mostrados correctamente.
+    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
+    // Por lo tanto, si en tu modelo PedidosViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
+    // para que sea detectada correctamente.
+    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
+    private PedidosViewModel pedido = new PedidosViewModel();
+    private bool showAlert = false;
+    private string alertMessage = "";
+    //Este metodo OnInitializedAsync se ejecuta cuando se carga la pagina, hace lo siguiente realiza una peticion get al servidor 
+    //luego lee la respuesta serializada y luego la deserializa para que el usuario la pueda ver.
+    protected override async Task OnInitializedAsync()
+    {
+
+        var response = await http.GetAsync($"api/Pedidos/{id}");
+        Console.WriteLine("Esta es la respuesta de eliminacion del pedido" + response);
+        if (response.IsSuccessStatusCode)
+        {
+            //si la peticion viene bien se procede a deserializar el json
+            var content = await response.Content.ReadAsStringAsync();
+            pedido = JsonSerializer.Deserialize<PedidosViewModel>(content);
+        }
+        else
+        {
+            var message = await response.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    // DeletePedido se llama cuando el usuario hace clic en el botón de eliminar pedido. Realiza una petición DELETE al servidor para eliminar 
+    // el pedido y maneja la respuesta.
+    private async Task DeletePedido(PedidosViewModel pedido)
+    {
+        var resultado = await http.DeleteAsync($"api/Pedidos/{pedido.id}");
+        if (resultado.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/pedidos");
+        }
+        else
+        {
+            var message = await resultado.Content.ReadAsStringAsync();
+            ShowAlert(message);
+        }
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+}
