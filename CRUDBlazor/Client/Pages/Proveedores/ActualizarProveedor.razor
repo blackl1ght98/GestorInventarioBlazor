@@ -5,10 +5,10 @@
 @inject NavigationManager NavigationManager
 <h3>ActualizarProveedor</h3>
 <EditForm Model="proveedor" class="form-group">
-    <InputText @bind-Value=proveedor.nombreProveedor @bind-Value:event="oninput" class="form-control" placeholder="Nombre del proveedor"></InputText>
-    <InputText @bind-Value=proveedor.direccion @bind-Value:event="oninput" class="form-control" placeholder="direccion del proveedor"></InputText>
-    <InputText @bind-Value=proveedor.contacto @bind-Value:event="oninput" class="form-control" placeholder="contacto del proveedor"></InputText>
-    
+    <InputText @bind-Value="proveedor.nombreProveedor" @oninput="(e=> proveedor.nombreProveedor= e.Value.ToString())" class="form-control" placeholder="Nombre del proveedor" />
+    <InputText @bind-Value="proveedor.direccion" @oninput="(e=> proveedor.direccion= e.Value.ToString())" class="form-control" placeholder="Dirección del proveedor" />
+    <InputText @bind-Value="proveedor.contacto" @oninput="(e=> proveedor.contacto= e.Value.ToString())" class="form-control" placeholder="Contacto del proveedor" />
+
     <button @onclick="(()=>EditarProveedor(proveedor))" class="btn btn-primary mt-2">Actualizar Proveedor</button>
 </EditForm>
 
@@ -51,6 +51,8 @@
             // Redirige al usuario a la página principal después de actualizar el departamento
             NavigationManager.NavigateTo("/proveedores");
         }
-       
+
     }
+   
+
 }

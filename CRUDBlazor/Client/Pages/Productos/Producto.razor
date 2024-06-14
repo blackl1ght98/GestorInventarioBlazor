@@ -1,7 +1,10 @@
 ﻿@using System.Text.Json
 @using System.Text
 @using CRUDBlazor.Shared.Productos
+@using System.Web
+@using CRUDBlazor.Shared.Proveedores
 @inject HttpClient http
+@inject NavigationManager NavigationManager
 @page "/productos"
 <h3>Producto</h3>
 <div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
@@ -14,6 +17,27 @@
     else
     {
         <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+        <EditForm Model="this" OnValidSubmit="GetBuscarProducto">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <InputText id="buscar" @bind-Value="buscar" class="form-control" placeholder="Buscar producto" />
+            <select class="form-select mt-2" @bind="ordenarPorPrecio">
+                <option value="">Ordenar por precio</option>
+                <option value="asc">Ascendente</option>
+                <option value="desc">Descendente</option>
+            </select>
+            <select class="form-select mt-2" @bind="idProveedor">
+                <option value="0">Seleccionar proveedor</option>
+            @foreach (var proveedor in proveedores)
+            {
+                <option value="@proveedor.id">@proveedor.nombreProveedor</option>
+            }
+        </select>
+
+            <button type="submit" class="btn btn-primary mt-2">Buscar</button>
+        </EditForm>
+      
         @foreach (var producto in productos)
         {
             <div class="card mb-3">
@@ -27,7 +51,6 @@
                         <strong>Imagen:</strong> <br/><img src="@producto.imagen" alt="Imagen del producto" style="width:100px; height:100px;" />
                     </p>
                     <p class="card-text"><strong>Cantidad:</strong> @producto.cantidad</p>
-
                     <p class="card-text"><strong>Precio:</strong> @producto.precio</p>
                     <p class="card-text"><strong>Nombre del proveedor:</strong> @producto.idProveedorNavigation.nombreProveedor</p>
 
@@ -75,6 +98,8 @@
     private ProductosViewModel producto = new ProductosViewModel();
     // Crea un array de productos para poder mostrarlos en la interfaz de usuario.
     private ProductosViewModel[] productos;
+    //Crea un array inicializado en 0
+    public ProveedorViewModel[] proveedores = new ProveedorViewModel[0];
     // Configuración para agregar la paginación. Esto permite al usuario navegar a través de las páginas de productos.
     private Paginacion paginacion = new Paginacion();
     // Crea un diccionario que almacena las cantidades de cada producto que se añade al carrito. El número inicial es 1 porque esta es 
@@ -86,42 +111,177 @@
     //Mostrar el mensaje de error
     private bool showAlert = false;
     private string alertMessage = "";
-   
+    //Parametros de busqueda
+    private string buscar;
+    private string ordenarPorPrecio;
+    string ordenarPorPrecioAnterior;
+    private int idProveedor = 0;
+    private int idProveedorAnterior;
+
     protected override async Task OnInitializedAsync()
     {
+        idProveedor = 0; // Asigna -1 a idProveedor
+
         //Al array que inicialmete esta vacio se le asigna los productos que debe mostrar
         productos = await GetProducto();
+        proveedores = await GetProveedores();
+        /*Recorremos el array de productos y cada producto inicializamos la cantidad en 1 esta cantidad corresponde a el numero
+         * de productos que va a ir al carrito.
+        */
         foreach (var producto in productos)
         {
-            //Este es el motivo por el cual la funcion de "Agregar al carrito" esta inicializado en 1. 
-            //pero a esto hay que decirle a que productos le pertenece esa cantidad por ello se le pasa la id de cada producto
-            //Gracias al foreach se le asigna a cada producto que exista en base de datos.
-            cantidades[producto.id] = 1; 
-        }
 
+            cantidades[producto.id] = 1; 
+        }    
+        /*Con este if mostramos los proveedores al usuario*/
+        if (proveedores.Length >0)
+        {
+            idProveedor = proveedores[0].id;
+        }
     }
     private async Task<ProductosViewModel[]> GetProducto()
     {
-        /*El motivo por el cual la url quera asi es porque a esa url se le pasa una consulta y esta
-         * consulta es para decirle al controlador que pagina tiene que mostrar y que cantidad de registros
+        /*Realiza una petición GET al servidor y se le pasan unos parámetros de consulta.
+        * Los parámetros de consulta siempre van después del interrogante ?
         */
-       //Realiza una peticion get al servidor
-        var response = await http.GetAsync($"api/Producto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}");
-        //Si la respuesta es valida...
+        string url = $"api/Producto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}";
+        //Si id proveedor es distinto de 0 agrega este parametro de consulta a la url
+        if (idProveedor != 0)
+        {
+            url += $"&idProveedor={idProveedor}";
+        }
+        var response = await http.GetAsync(url);
+        //Si la respuesta es válida...
         if (response.IsSuccessStatusCode)
         {
-            //Muestra el numero de paginas totales
+            //Muestra el número de páginas totales almacenado en la cabecera de la petición
             paginasTotales = int.Parse(response.Headers.GetValues("totalPaginas").FirstOrDefault());
-            Console.WriteLine($"Paginas totales después de obtener usuarios: {paginasTotales}");
         }
+        //Lee y serializa la petición
         var content = await response.Content.ReadAsStringAsync();
+        //Deserializa la respuesta del servidor para mostrar los datos al usuario.
         return JsonSerializer.Deserialize<ProductosViewModel[]>(content);
     }
+
+    private async Task GetBuscarProducto()
+    {
+        // Si 'buscar' es null, se convierte en una cadena vacía
+        buscar = buscar ?? string.Empty;
+        // Si el campo de búsqueda está vacío...
+        if (string.IsNullOrEmpty(buscar))
+        {
+            // ...se llama a la función GetProducto() para obtener todos los productos
+            productos = await GetProducto();
+        }
+        else
+        {
+            // Si el campo de búsqueda no está vacío, se realiza la búsqueda en todas las páginas.
+            // Se crea una lista para almacenar todos los productos encontrados
+            List<ProductosViewModel> todosLosProductos = new List<ProductosViewModel>();
+            // Este bucle recorre todas las páginas de productos
+            for (int i = 1; i <= paginasTotales; i++)
+            {
+                // Se realiza una solicitud GET a la API para cada página, incluyendo el valor de 'buscar' en la consulta
+                var response = await http.GetAsync($"api/Producto?pagina={i}&CantidadAMostrar={paginacion.CantidadAMostrar}&buscar={buscar}&idProveedor={idProveedor}");
+                var content = await response.Content.ReadAsStringAsync();
+                var productosEnPagina = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
+                // Se añaden los productos encontrados en la página actual a la lista de todos los productos
+                todosLosProductos.AddRange(productosEnPagina);
+            }
+            // Se convierte la lista de todos los productos en un array y se asigna a 'productos'
+            productos = todosLosProductos.ToArray();
+            // Se actualiza el diccionario 'cantidades' con las cantidades para los nuevos productos
+            foreach (var producto in productos)
+            {
+                // Si el diccionario 'cantidades' no contiene una entrada para el producto actual, se añade una con valor 1
+                if (!cantidades.ContainsKey(producto.id))
+                {
+                    cantidades[producto.id] = 1;
+                }
+            }
+        }
+       /*
+       * 'ordenarPorPrecio' y 'ordenarPorPrecioAnterior' almacenan los criterios de ordenación actuales y anteriores, respectivamente.
+       * Los posibles criterios son 'asc' para ascendente, 'desc' para descendente y 'null' para no ordenado.
+       *
+       * Inicialmente, tanto 'ordenarPorPrecio' como 'ordenarPorPrecioAnterior' son 'null', lo que indica que los productos no están ordenados.
+       *
+       * Cuando se selecciona un criterio de ordenación (ascendente o descendente), 'ordenarPorPrecio' se actualiza al criterio seleccionado. 
+       * Por ejemplo, si se selecciona 'asc', 'ordenarPorPrecio' se convierte en 'asc'.
+       * Como 'ordenarPorPrecioAnterior' es 'null' (el estado anterior) y 'ordenarPorPrecio' es 'asc' (el estado actual), la condición se cumple 
+       * y se ordenan los productos por precio.
+       *
+       * Finalmente, 'ordenarPorPrecioAnterior' se actualiza al estado actual de 'ordenarPorPrecio', es decir, 'ordenarPorPrecioAnterior' se 
+       * convierte en 'asc'.
+        */
+        if (ordenarPorPrecio != ordenarPorPrecioAnterior)
+        {
+            await OrdenarPorPrecio();
+            ordenarPorPrecioAnterior = ordenarPorPrecio;
+        }
+     /*
+     * 'idProveedor' y 'idProveedorAnterior' almacenan los ID del proveedor seleccionado actualmente y anteriormente, respectivamente.
+     * Inicialmente, ambos son 0 porque ningún proveedor ha sido seleccionado.
+     *
+     * Cuando se selecciona un proveedor, 'idProveedor' se actualiza al ID del proveedor seleccionado. Por ejemplo, si se selecciona el primer 
+     * proveedor, 'idProveedor' sería 1.
+     * Como 'idProveedorAnterior' es 0 (el estado anterior) y 'idProveedor' es 1 (el estado actual), la condición se cumple y se muestran los 
+     * productos del proveedor seleccionado.
+     *
+     * Finalmente, 'idProveedorAnterior' se actualiza al estado actual de 'idProveedor', es decir, 'idProveedorAnterior' se convierte en 1.
+        */
+        if (idProveedor != idProveedorAnterior)
+        {
+            await OrdenarPorProveedor();
+            idProveedorAnterior = idProveedor;
+        }
+    }
+    private async Task OrdenarPorPrecio()
+    {
+        var response = await http.GetAsync($"api/Producto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}&ordenarPorPrecio={ordenarPorPrecio}");
+        var content = await response.Content.ReadAsStringAsync();
+        productos = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
+        /*Ha la hora de hacer la busqueda esto hay que ponerlo de nuevo para que se asigne bien las cantidades a cada producto
+         * esto corresponde con la cantidad del producto que vas a mandar al carrito
+        */
+        foreach(var producto in productos)
+        {
+            if (!cantidades.ContainsKey(producto.id))
+            {
+                cantidades[producto.id] = 1;
+            }
+        }
+    }
+    private async Task OrdenarPorProveedor()
+    {
+        if (idProveedor == 0)
+        {
+
+            return;
+        }
+        var response = await http.GetAsync($"api/Producto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}&idProveedor={idProveedor}");
+        var content = await response.Content.ReadAsStringAsync();
+        productos = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
+        foreach (var producto in productos)
+        {
+            if (!cantidades.ContainsKey(producto.id))
+            {
+                cantidades[producto.id] = 1;
+            }
+        }
+    }
+    private async Task<ProveedorViewModel[]> GetProveedores()
+    {
+        var response = await http.GetAsync("api/Proveedor");
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<ProveedorViewModel[]>(content);
+    }  
     private async Task PaginaSeleccionada(int pagina)
     {
         Console.WriteLine($"Pagina seleccionada: {pagina}");
         paginacion.Pagina = pagina;
         productos = await GetProducto();
+        proveedores = await GetProveedores();
         //El motivo por el que se pone este forech aqui es para mostrar la cantidad de la funcion de "Agregar producto" de los productos de 
         //la pagina siguiente
         foreach (var producto in productos)

@@ -1,4 +1,5 @@
 ﻿using CRUDBlazor.Server.Helpers;
+using CRUDBlazor.Server.Interfaces.Infrastructure;
 using CRUDBlazor.Server.Models;
 using CRUDBlazor.Shared;
 using CRUDBlazor.Shared.Proveedores;
@@ -15,17 +16,20 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
     {
         private readonly DbcrudBlazorContext _context;
         private readonly ILogger<ProveedorController> _logger;
-        public ProveedorController(DbcrudBlazorContext context, ILogger<ProveedorController> logger)
+        private readonly IProveedorRepository _proveedorRepository;
+        public ProveedorController(DbcrudBlazorContext context, ILogger<ProveedorController> logger, IProveedorRepository proveedor)
         {
             _context = context;
             _logger = logger;
+            _proveedorRepository=proveedor;
         }
         [HttpGet]
         public async Task<ActionResult<List<Proveedore>>> GetAllProviders([FromQuery] Paginacion paginacion)
         {
             try
             {
-                var provider = _context.Proveedores.AsQueryable();
+                var provider =  _proveedorRepository.ObtenerTodosProveedores();
+               // var provider = _context.Proveedores.AsQueryable();
                 await HttpContext.InsertarParametrosPaginacionRespuesta(provider, paginacion.CantidadAMostrar);
                 return await provider.Paginar(paginacion).ToListAsync();
             }
@@ -43,15 +47,16 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var proveedor = new Proveedore()
+                    
+                    var (success,errorMessage)= await _proveedorRepository.CrearProveedor(model);
+                    if (success)
                     {
-                        NombreProveedor = model.nombreProveedor,
-                        Contacto = model.contacto,
-                        Direccion = model.direccion,
-                    };
-                    _context.Proveedores.Add(proveedor);
-                    await _context.SaveChangesAsync();
-                    return Redirect("https://localhost:7186/");
+                        return Ok(success);
+                    }
+                    else
+                    {
+                        return BadRequest(errorMessage);
+                    }
                 }
                 return Ok("Proveedor creado con exito");
             }
@@ -67,7 +72,8 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
         {
             try
             {
-                var proveedor = await _context.Proveedores.FirstOrDefaultAsync(x => x.Id == id);
+                var proveedor= await _proveedorRepository.ObtenerProveedorId(id);
+                //var proveedor = await _context.Proveedores.FirstOrDefaultAsync(x => x.Id == id);
                 return Ok(proveedor);
             }
             catch (Exception ex)
@@ -82,16 +88,25 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
         {
             try
             {
-                int idInt = int.Parse(id);
+                //int idInt = int.Parse(id);
 
-                var proveedor = await _context.Proveedores.FirstOrDefaultAsync(x => x.Id == idInt);
-                if (proveedor == null)
+                //var proveedor = await _context.Proveedores.FirstOrDefaultAsync(x => x.Id == idInt);
+                //if (proveedor == null)
+                //{
+                //    return NotFound("Proveedor no encontrado");
+                //}
+                //_context.Proveedores.Remove(proveedor);
+                //await _context.SaveChangesAsync();
+                //return Ok("Proveedor eliminado con exito");
+                var (success,errorMessage)=await _proveedorRepository.EliminarProveedor(id);
+                if (success)
                 {
-                    return NotFound("Proveedor no encontrado");
+                    return Ok(success);
                 }
-                _context.Proveedores.Remove(proveedor);
-                await _context.SaveChangesAsync();
-                return Ok("Proveedor eliminado con exito");
+                else
+                {
+                    return BadRequest(errorMessage);    
+                }
             }
             catch (Exception ex)
             {
@@ -105,17 +120,26 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
         {
             try
             {
-                var existeProveedor = await _context.Proveedores.FindAsync(proveedor.id);
-                if (existeProveedor == null)
+                var (success, errorMessage) = await _proveedorRepository.EditarProveedor(proveedor);
+                if (success)
                 {
-                    return NotFound("El proveedor que intenta editar no existe");
+                    return Ok(success);
                 }
-                existeProveedor.NombreProveedor = proveedor.nombreProveedor;
-                existeProveedor.Contacto = proveedor.contacto;
-                existeProveedor.Direccion = proveedor.direccion;
-                _context.Entry(existeProveedor).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-                return Ok("Proveedor editado con exito");
+                else
+                {
+                    return BadRequest(errorMessage);
+                }
+                //var existeProveedor = await _context.Proveedores.FindAsync(proveedor.id);
+                //if (existeProveedor == null)
+                //{
+                //    return NotFound("El proveedor que intenta editar no existe");
+                //}
+                //existeProveedor.NombreProveedor = proveedor.nombreProveedor;
+                //existeProveedor.Contacto = proveedor.contacto;
+                //existeProveedor.Direccion = proveedor.direccion;
+                //_context.Entry(existeProveedor).State = EntityState.Modified;
+                //await _context.SaveChangesAsync();
+                //return Ok("Proveedor editado con exito");
             }
             catch (Exception ex)
             {

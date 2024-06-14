@@ -3,11 +3,11 @@
 @using CRUDBlazor.Shared.Proveedores
 @inject HttpClient http
 @inject NavigationManager NavigationManager
-<h3>CrearProveedor</h3>
+<h3>Crear Proveedor</h3>
 <EditForm Model="proveedor" class="form-group">
-    <InputText @bind-Value=proveedor.nombreProveedor class="form-control " placeholder="Nombre del proveedor"></InputText>
-    <InputText @bind-Value=proveedor.contacto class="form-control mt-2" placeholder="Contacto del proveedor"></InputText>
-    <InputText @bind-Value=proveedor.direccion class="form-control mt-2" placeholder="direccion del proveedor"></InputText>
+    <InputText @bind-Value=proveedor.nombreProveedor   class="form-control " placeholder="Nombre del proveedor"></InputText>
+    <InputText @bind-Value=proveedor.contacto  class="form-control mt-2" placeholder="Contacto del proveedor"></InputText>
+    <InputText @bind-Value=proveedor.direccion  class="form-control mt-2" placeholder="direccion del proveedor"></InputText>
     <button @onclick="(()=>CreacionProveedor(proveedor))" class="btn btn-primary mt-2">Crear Proveedor</button>
 </EditForm>
 @code {
@@ -27,4 +27,6 @@
         }
         
     }
+   
+  
 }

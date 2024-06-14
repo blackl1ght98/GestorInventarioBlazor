@@ -31,6 +31,8 @@
             <option value="@usuarios.id">@usuarios.nombreCompleto</option>
         }
     </InputSelect>
+    <label>Seleccione el producto o productos que desea: </label>
+    <br/>
     @for (var i = 0; i < productos.Length; i++)
     {
         var producto = productos[i];
@@ -67,7 +69,7 @@
     private ProductosViewModel[] productos = new ProductosViewModel[0];
     private bool showAlert = false;
     private string alertMessage = "";
- 
+
     protected override async Task OnInitializedAsync()
     {
         //Obtenemos todos los usuarios
@@ -81,11 +83,13 @@
         //Obtenemos todos los productos
         productos = await GetAllProductos();
         //Al inicio el usuario no ha seleccionado ningun producto por lo tanto se pone todos los productos en false
-         pedido.productosSeleccionados = Enumerable.Repeat(false, productos.Length).ToList();
+        pedido.productosSeleccionados = Enumerable.Repeat(false, productos.Length).ToList();
         //Al inicio el usuario no ha puesto ninguna cantidad por lo tanto las cantidades de todos lo productos se inicializan en 0
         pedido.cantidades = new List<int>(new int[productos.Length]);
         //Se genera un numero de pedido aleatorio
         pedido.numeroPedido = GenerarNumeroPedido();
+        //Si no seleccionamos nada de la lista se estable con este valor de manera predeterminada
+        pedido.estadoPedido = EstadoPedido.PedienteDePago.ToString();
         //Intenta convertir la enumeracion en string y lo almacena en la variable estado
         if (Enum.TryParse<EstadoPedido>(pedido.estadoPedido, out var estado))
         {
@@ -107,7 +111,7 @@
     //Realiza una peticion al servidor que obtiene todos los productos
     private async Task<ProductosViewModel[]> GetAllProductos()
     {
-        var response = await http.GetAsync($"api/Producto/all");
+        var response = await http.GetAsync($"api/Pedidos/all/productos");
         var content = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<ProductosViewModel[]>(content);
     }

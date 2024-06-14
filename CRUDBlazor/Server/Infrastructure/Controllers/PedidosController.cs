@@ -1,4 +1,5 @@
 ﻿using CRUDBlazor.Server.Helpers;
+using CRUDBlazor.Server.Interfaces.Infrastructure;
 using CRUDBlazor.Server.Models;
 using CRUDBlazor.Shared;
 using CRUDBlazor.Shared.Pedidos;
@@ -15,23 +16,15 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
     {
         private readonly DbcrudBlazorContext _context;
         private readonly ILogger<PedidosController> _logger;
+        private readonly IPedidoRepository _pedidoRepository;
 
-        public PedidosController(DbcrudBlazorContext context, ILogger<PedidosController> logger)
+        public PedidosController(DbcrudBlazorContext context, ILogger<PedidosController> logger, IPedidoRepository pedido)
         {
             _context = context;
             _logger = logger;
+            _pedidoRepository = pedido;
         }
-        //[HttpGet]
-        //public async Task<IActionResult> GetAllPedidos([FromQuery] Paginacion paginacion)
-        //{
-        //    var pedidos = _context.Pedidos.Include(dp => dp.DetallePedidos)
-        //        .ThenInclude(p => p.Producto)
-        //        .Include(u => u.IdUsuarioNavigation);
-        //    await HttpContext.InsertarParametrosPaginacionRespuesta(pedidos, paginacion.CantidadAMostrar);
-        //    var pedidosPaginados = await pedidos.Paginar(paginacion).ToListAsync();
-        //    var totalPaginas = HttpContext.Response.Headers["totalPaginas"].ToString();
-        //    return Ok(pedidosPaginados);
-        //}
+      
         [HttpGet]
         public async Task<IActionResult> GetAllPedidos([FromQuery] Paginacion paginacion)
         {
@@ -41,26 +34,20 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
                 int usuarioId;
                 if (int.TryParse(existeUsuario, out usuarioId))
                 {
-                    //IQueryable permite construir consultas dinamicas con las que se pueden hacer bastantes cosas
-                    IQueryable<Pedido> pedidos;
-
-                    // Si el usuario es un administrador
+                   
+                    var pedidos = _pedidoRepository.ObtenerPedidos();
+                   
                     if (User.IsInRole("administrador"))
                     {
-                        // Muestra todos los pedidos
-                        pedidos = _context.Pedidos.Include(dp => dp.DetallePedidos)
-                            .ThenInclude(p => p.Producto)
-                            .Include(u => u.IdUsuarioNavigation);
+                       
+                       
+                        pedidos = _pedidoRepository.ObtenerPedidoAdmin();
                     }
-                    else // Si el usuario no es un administrador
+                    else 
                     {
-                        // Muestra solo los pedidos del usuario
-                        pedidos = _context.Pedidos.Where(p => p.IdUsuario == usuarioId)
-                            .Include(dp => dp.DetallePedidos)
-                            .ThenInclude(p => p.Producto)
-                            .Include(u => u.IdUsuarioNavigation);
+                       
+                        pedidos = _pedidoRepository.ObtenerPedidoUsuario(usuarioId);
                     }
-
                     await HttpContext.InsertarParametrosPaginacionRespuesta(pedidos, paginacion.CantidadAMostrar);
                     var pedidosPaginados = await pedidos.Paginar(paginacion).ToListAsync();
                     var totalPaginas = HttpContext.Response.Headers["totalPaginas"].ToString();
@@ -71,16 +58,31 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
                     // Si no se puede obtener el usuario, devuelve un error de autorización
                     return Unauthorized("No tiene autorizacion para ver el contenido");
                 }
-
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener los pedidos");
                 return BadRequest("Error al obtener los pedidos intentelo de nuevo mas tarde si el problema persiste contacte con el administrador");
-            }
-           
+            }         
         }
+        [HttpGet("all/productos")]
+        public async Task<IActionResult> GetAllProduct()
+        {
+            try
+            {
+                var productos = await _pedidoRepository.ObtenerProductosPedido();
+                //var productos = await _context.Productos.ToListAsync();
+                return Ok(productos);
 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener todos los productos");
+                return BadRequest("En este momento no se pueden obtener los productos intentelo mas tarde si el error persiste contacte con el admin");
+
+            }
+
+        }
         [HttpPost]
         public async Task<IActionResult> CrearPedido(PedidosViewModel model)
         {
@@ -88,43 +90,18 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var pedido = new Pedido()
+                   
+                    var (success, errorMessage) = await _pedidoRepository.CrearPedido(model);
+                    if (success)
                     {
-                        NumeroPedido = model.numeroPedido,
-                        FechaPedido = model.fechaPedido,
-                       
-                        IdUsuario = model.idUsuario,
-                    };
-                    if (Enum.TryParse<EstadoPedido>(model.estadoPedido, out var estado))
-                    {
-                        pedido.EstadoPedido = Enum.GetName(typeof(EstadoPedido), estado);
+                        return Ok(success);
                     }
                     else
                     {
-                        return BadRequest("Estado de pedido inválido");
+                        return BadRequest(errorMessage);
                     }
-                    _context.Add(pedido);
-                    await _context.SaveChangesAsync();
-
-                    for (var i = 0; i < model.idsProducto.Count; i++)
-                    {
-                        // Comprueba si el producto ha sido seleccionado
-                        if (model.productosSeleccionados[i])
-                        {
-                            var detallePedido = new DetallePedido()
-                            {
-                                PedidoId = pedido.Id,
-                                ProductoId = model.idsProducto[i],
-                                Cantidad = model.cantidades[i],
-                            };
-                            _context.Add(detallePedido);
-                        }
-                    }
-
-                    await _context.SaveChangesAsync();
-                    return Ok("Producto agregado con exito");
                 }
-                return BadRequest("Modelo no valido, si falta algun campo ponlo");
+                return BadRequest("Hubo un error al crear un pedido");
             }
             catch (Exception ex)
             {
@@ -139,9 +116,10 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
             try
             {
                 int idInt = int.Parse(id);
-                var pedido = await _context.Pedidos.Include(dp => dp.DetallePedidos)
-                    .ThenInclude(p => p.Producto).Include(p => p.IdUsuarioNavigation)
-                    .FirstOrDefaultAsync(x => x.Id == idInt);
+                //var pedido = await _context.Pedidos.Include(dp => dp.DetallePedidos)
+                //    .ThenInclude(p => p.Producto).Include(p => p.IdUsuarioNavigation)
+                //    .FirstOrDefaultAsync(x => x.Id == idInt);
+                var pedido = await _pedidoRepository.ObtenerDetallePedido(idInt);
                 if (pedido == null)
                 {
                     return BadRequest("Pedido no encontrado");
@@ -162,14 +140,16 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
             try
             {
                 int idInt = int.Parse(id);
-                var pedido = await _context.Pedidos.Include(dp => dp.DetallePedidos).FirstOrDefaultAsync(x => x.Id == idInt);
-                if (pedido == null)
+            
+                var (success,errorMessage)= await _pedidoRepository.EliminarPedido(idInt);
+                if (success)
                 {
-                    return NotFound("Pedido no encontrado");
+                    return Ok(success);
                 }
-                _context.Pedidos.Remove(pedido);
-                await _context.SaveChangesAsync();
-                return Ok("Pedido eliminado con exito");
+                else
+                {
+                    return BadRequest(errorMessage);
+                }
 
             }
             catch (Exception ex)
@@ -184,27 +164,16 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
         {
             try
             {
-                var pedido = await _context.Pedidos.FirstOrDefaultAsync(x => x.Id == model.id);
-                if (pedido == null)
+                
+                var (success, errorMessage) = await _pedidoRepository.EditarPedido(model);
+                if (success)
                 {
-                    return NotFound("Pedido no encontrado");
-                }
-
-                pedido.FechaPedido = model.fechaPedido;
-
-                // Convierte la cadena al valor de enumeración correspondiente
-                if (Enum.TryParse<EstadoPedido>(model.estadoPedido, out var estado))
-                {
-                    pedido.EstadoPedido = Enum.GetName(typeof(EstadoPedido), estado);
+                    return Ok(success);
                 }
                 else
                 {
-                    return BadRequest("Estado de pedido inválido");
+                    return BadRequest(errorMessage);    
                 }
-
-                _context.Pedidos.Update(pedido);
-                await _context.SaveChangesAsync();
-                return Ok("Pedido actualizado con éxito");
             }
             catch (Exception ex)
             {

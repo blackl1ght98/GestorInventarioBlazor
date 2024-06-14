@@ -7,8 +7,7 @@
 <h3>Actualizar Pedido</h3>
 <EditForm Model="pedido" OnValidSubmit="ActualizacionPedido" class="form-group">
     <DataAnnotationsValidator />
-    <ValidationSummary />
-    
+    <ValidationSummary />  
     <label>Fecha Pedido: </label>
     <InputDate @bind-Value=pedido.fechaPedido class="form-control mt-2" placeholder="Descripcion del producto"></InputDate>
     <ValidationMessage For="@(() => pedido.fechaPedido)" />

@@ -48,11 +48,14 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<IAuthRepository, AuthRepository>();
 builder.Services.AddTransient<IGestorArchivos, GestorArchivosService>();
 builder.Services.AddTransient<INewStringGuid, NewStringGuid>();
+builder.Services.AddTransient<IPedidoRepository, PedidoRepository>();
 builder.Services.AddTransient<IPaypalService, PaypalServices>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<ICarritoRepository,CarritoRepository>();
+builder.Services.AddTransient<IProveedorRepository,ProveedorRepository>();
 builder.Services.AddTransient<HashService>();
 builder.Services.AddTransient<TokenService>();
+builder.Services.AddTransient<IProductoRepository, ProductoRepository>();
 // Add services to the container.
 builder.Services.AddMvc();
 builder.Services.AddControllersWithViews();

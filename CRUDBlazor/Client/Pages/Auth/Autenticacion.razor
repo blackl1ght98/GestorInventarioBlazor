@@ -11,8 +11,29 @@
     <!--En blazor es importante el orden en el que colocas el enlace de datos si ha ese enlace de datos necesitas ponerle un evento
         tiene que ir despues de bind-value
     -->
+    <!--¿Que es el evento oninput en blazor?-->
+    <!--Este evento captura y actualiza el campo cada vez que escribes algo dicho evento captura por ejemplo el email que es un string
+        pero este evento no devuelve un string lo cambia a algo de tipo ChangeEventArgs claro al blazor cambiarlo de tipo pues hay que
+            volverlo a convertir en string, si no se hace la conversion da luegar a esta excepcion  Unhandled exception rendering component: Object of type 'Microsoft.AspNetCore.Components.ChangeEventArgs' cannot be converted to type 'System.String'.
+    System.ArgumentException: Object of type 'Microsoft.AspNetCore.Components.ChangeEventArgs' cannot be converted to type 'System.String'.
+    para solucionarlo es necesario convertirlo a string.
+    Este evento lo podemos hace de la manera siguiente:
+        Una de las maneras mas faciles es <InputText bind-Value="usuario.email"
+    oninput="(e=> usuario.email= e.Value.ToString())" class="form-control" placeholder="Introduzca su email" /> ponerlo de esta manera o 
+    poner lo mismo pero en el oninput nombrar al metodo en este caso oninputemail
+         void OnInputemail(ChangeEventArgs e)
+    {
+        usuario.email = e.Value.ToString();
+    }
+   IMPORTANTE:
+   No es recomendable poner arrobabind-value="oninput" en un input junto a bind-value porque los dos se pisan entre si y p`rovocan comportamientos
+   inesperados entonces la manera correcta de hacer uso del evento oninput es  <InputText bind-Value="usuario.email"  
+   oninput="(e=> usuario.email= e.Value.ToString())" class="form-control" placeholder="Introduzca su email" />
+    -->
+  
     <InputText @bind-Value="usuario.email"  class="form-control" placeholder="Introduzca su email" />
     <label>Password: </label>
+   
     <!--Por defecto, Blazor actualiza el valor enlazado de un campo de entrada cuando el campo pierde el foco. Esto se conoce como el evento 
     onchange. Sin embargo, si deseas que Blazor actualice el valor enlazado con cada pulsación de tecla, puedes cambiar el evento de enlace a 
     oninput.
@@ -22,6 +43,10 @@
     Cuando cambias a bind-value:event="oninput", le estás diciendo a Blazor que actualice usuario.password con cada pulsación de tecla. Esto 
     asegura que usuario.password siempre tenga el valor más reciente, independientemente de si el campo de contraseña ha perdido el foco o no.
     -->
+   
+
+
+
     <input type="password" @bind-value=usuario.password @bind-value:event="oninput" class="form-control" placeholder="Introduzca su password" />
     <button @onclick="(()=>Autenticar(usuario))" class="btn btn-primary mt-2">Login</button>
     @if (showAlert)
@@ -70,4 +95,9 @@
         showAlert = true;
         alertMessage = message;
     }
+    void OnInputEmail(ChangeEventArgs e)
+    {
+        usuario.email = e.Value.ToString();
+    }
+    
 }
