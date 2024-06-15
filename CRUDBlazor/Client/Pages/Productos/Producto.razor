@@ -1,14 +1,16 @@
 ﻿@using System.Text.Json
 @using System.Text
+@using CRUDBlazor.Client.Services.Producto
 @using CRUDBlazor.Shared.Productos
 @using System.Web
 @using CRUDBlazor.Shared.Proveedores
 @inject HttpClient http
 @inject NavigationManager NavigationManager
+@inject ApiProperties prop 
 @page "/productos"
 <h3>Producto</h3>
 <div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
-    @if (productos == null)
+    @if (prop.productos == null)
     {
         <div class="spinner-border" role="status">
             <span class="sr-only"></span>
@@ -16,20 +18,19 @@
     }
     else
     {
-        <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+        <ConfiguracionPaginacion PaginasTotales="prop.paginasTotales" PaginaActual="prop.paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
         <EditForm Model="this" OnValidSubmit="GetBuscarProducto">
             <DataAnnotationsValidator />
             <ValidationSummary />
-
-            <InputText id="buscar" @bind-Value="buscar" class="form-control" placeholder="Buscar producto" />
-            <select class="form-select mt-2" @bind="ordenarPorPrecio">
+            <InputText id="buscar" @bind-Value="prop.buscar" class="form-control" placeholder="Buscar producto" />
+            <select class="form-select mt-2" @bind="prop.ordenarPorPrecio">
                 <option value="">Ordenar por precio</option>
                 <option value="asc">Ascendente</option>
                 <option value="desc">Descendente</option>
             </select>
-            <select class="form-select mt-2" @bind="idProveedor">
+            <select class="form-select mt-2" @bind="prop.idProveedor">
                 <option value="0">Seleccionar proveedor</option>
-            @foreach (var proveedor in proveedores)
+            @foreach (var proveedor in prop.proveedores)
             {
                 <option value="@proveedor.id">@proveedor.nombreProveedor</option>
             }
@@ -37,8 +38,9 @@
 
             <button type="submit" class="btn btn-primary mt-2">Buscar</button>
         </EditForm>
-      
-        @foreach (var producto in productos)
+        <button @onclick="LimpiarFiltros">Limpiar filtros</button>
+
+        @foreach (var producto in prop.productos)
         {
             <div class="card mb-3">
                 <div class="card-header">
@@ -67,17 +69,15 @@
               </div>
                     <div class="card-footer d-flex justify-content-between">
                         <div>
-                            <input type="number" @bind="cantidades[producto.id]" min="1" max="@producto.cantidad" />
+                            <input type="number" @bind="prop.cantidades[producto.id]" min="1" max="@producto.cantidad" />
                             <button class="btn btn-primary mt-2" @onclick="() => AgregarAlCarrito(producto.id)">Agregar al carrito</button>
 
-                        </div>
-                       
-
+                        </div>                    
                     </div>
-                    @if (showAlert)
+                    @if (prop.showAlert)
                     {
                         <div class="alert alert-danger mt-2" role="alert">
-                            @alertMessage
+                            @prop.alertMessage
                         </div>
                     }
                 </div>
@@ -87,186 +87,137 @@
 </div>
 <a href="/crearproducto" class="btn btn-info">Crear Producto</a>
 @code {
-    // Debido a la arquitectura de Blazor, el servidor y el cliente están separados, lo que significa que debemos manejar los datos de una
-    // manera que ambos puedan entender.
-    // Cuando consultas algo desde el cliente al servidor, debes asegurarte de que los datos estén formateados de manera que puedan ser
-    // mostrados correctamente.
-    // Cuando recibes datos del servidor, estos vienen en formato JSON. En JSON, todas las propiedades comienzan con una letra minúscula.
-    // Por lo tanto, si en tu modelo ProductosViewModel nombras una propiedad como "Nombre", no será reconocida. Debes nombrarla como "nombre"
-    // para que sea detectada correctamente.
-    // La razón de esto es la convención de nomenclatura de las propiedades en los archivos JSON.
-    private ProductosViewModel producto = new ProductosViewModel();
-    // Crea un array de productos para poder mostrarlos en la interfaz de usuario.
-    private ProductosViewModel[] productos;
-    //Crea un array inicializado en 0
-    public ProveedorViewModel[] proveedores = new ProveedorViewModel[0];
-    // Configuración para agregar la paginación. Esto permite al usuario navegar a través de las páginas de productos.
-    private Paginacion paginacion = new Paginacion();
-    // Crea un diccionario que almacena las cantidades de cada producto que se añade al carrito. El número inicial es 1 porque esta es 
-    // la cantidad predeterminada.
-    private Dictionary<int, int> cantidades = new Dictionary<int, int>();
-    // Configuración para agregar la paginación. Estas variables mantienen un seguimiento de la página actual, el total de páginas.
-    private int paginaActual = 1;
-    private int paginasTotales;
-    //Mostrar el mensaje de error
-    private bool showAlert = false;
-    private string alertMessage = "";
-    //Parametros de busqueda
-    private string buscar;
-    private string ordenarPorPrecio;
-    string ordenarPorPrecioAnterior;
-    private int idProveedor = 0;
-    private int idProveedorAnterior;
-
     protected override async Task OnInitializedAsync()
     {
-        idProveedor = 0; // Asigna -1 a idProveedor
-
         //Al array que inicialmete esta vacio se le asigna los productos que debe mostrar
-        productos = await GetProducto();
-        proveedores = await GetProveedores();
-        /*Recorremos el array de productos y cada producto inicializamos la cantidad en 1 esta cantidad corresponde a el numero
-         * de productos que va a ir al carrito.
+        prop.productos = await GetProducto();
+        // Inicializa el array 'proveedores' con la lista de proveedores
+        prop.proveedores = await GetProveedores();
+        /*Se inicializa un bucle que recorre el array de productos y asigna la cantidad a cada producto, esta cantidad corresponde
+         * con la cantidad que tu agregas de ese producto al carrito
         */
-        foreach (var producto in productos)
+        foreach (var producto in prop.productos)
         {
 
-            cantidades[producto.id] = 1; 
+            prop.cantidades[producto.id] = 1; 
         }    
-        /*Con este if mostramos los proveedores al usuario*/
-        if (proveedores.Length >0)
-        {
-            idProveedor = proveedores[0].id;
-        }
     }
     private async Task<ProductosViewModel[]> GetProducto()
     {
-        /*Realiza una petición GET al servidor y se le pasan unos parámetros de consulta.
-        * Los parámetros de consulta siempre van después del interrogante ?
-        */
-        string url = $"api/Producto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}";
+        //Se declara una variable que almacena la url a la que se va ha realizar una petición get
+        //lo que hay despues del '?' son parametros de consulta.
+        string url = $"api/Producto?pagina={prop.paginacion.Pagina}&CantidadAMostrar={prop.paginacion.CantidadAMostrar}";
         //Si id proveedor es distinto de 0 agrega este parametro de consulta a la url
-        if (idProveedor != 0)
+        if (prop.idProveedor != 0)
         {
-            url += $"&idProveedor={idProveedor}";
+            url += $"&idProveedor={prop.idProveedor}";
         }
+        //Aquí es donde se realiza esa peticion get al servidor pasando la variable anterior
         var response = await http.GetAsync(url);
         //Si la respuesta es válida...
         if (response.IsSuccessStatusCode)
         {
             //Muestra el número de páginas totales almacenado en la cabecera de la petición
-            paginasTotales = int.Parse(response.Headers.GetValues("totalPaginas").FirstOrDefault());
+            prop.paginasTotales = int.Parse(response.Headers.GetValues("totalPaginas").FirstOrDefault());
         }
         //Lee y serializa la petición
         var content = await response.Content.ReadAsStringAsync();
         //Deserializa la respuesta del servidor para mostrar los datos al usuario.
         return JsonSerializer.Deserialize<ProductosViewModel[]>(content);
     }
-
+ 
     private async Task GetBuscarProducto()
     {
         // Si 'buscar' es null, se convierte en una cadena vacía
-        buscar = buscar ?? string.Empty;
+        prop.buscar = prop.buscar ?? string.Empty;
         // Si el campo de búsqueda está vacío...
-        if (string.IsNullOrEmpty(buscar))
+        if (string.IsNullOrEmpty(prop.buscar))
         {
             // ...se llama a la función GetProducto() para obtener todos los productos
-            productos = await GetProducto();
+            prop.productos = await GetProducto();
         }
         else
         {
-            // Si el campo de búsqueda no está vacío, se realiza la búsqueda en todas las páginas.
             // Se crea una lista para almacenar todos los productos encontrados
             List<ProductosViewModel> todosLosProductos = new List<ProductosViewModel>();
             // Este bucle recorre todas las páginas de productos
-            for (int i = 1; i <= paginasTotales; i++)
+            for (int i = 1; i <= prop.paginasTotales; i++)
             {
-                // Se realiza una solicitud GET a la API para cada página, incluyendo el valor de 'buscar' en la consulta
-                var response = await http.GetAsync($"api/Producto?pagina={i}&CantidadAMostrar={paginacion.CantidadAMostrar}&buscar={buscar}&idProveedor={idProveedor}");
+                // Realizar una petición GET para cada página
+                var response = await http.GetAsync($"api/Producto?pagina={i}&CantidadAMostrar={prop.paginacion.CantidadAMostrar}&buscar={prop.buscar}&idProveedor={prop.idProveedor}");
+                //Lee y serializa la respuesta
                 var content = await response.Content.ReadAsStringAsync();
+                //Se deserializa la respuesta
                 var productosEnPagina = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
-                // Se añaden los productos encontrados en la página actual a la lista de todos los productos
+                // Se añaden los productos encontrados en la página actual a la lista de 'todosLosProductos'
                 todosLosProductos.AddRange(productosEnPagina);
             }
-            // Se convierte la lista de todos los productos en un array y se asigna a 'productos'
-            productos = todosLosProductos.ToArray();
-            // Se actualiza el diccionario 'cantidades' con las cantidades para los nuevos productos
-            foreach (var producto in productos)
+            // Convertir la lista a un array y actualizar 'productos'
+            prop.productos = todosLosProductos.ToArray();
+            // Actualizar 'cantidades' para los nuevos productos
+            foreach (var producto in prop.productos)
             {
-                // Si el diccionario 'cantidades' no contiene una entrada para el producto actual, se añade una con valor 1
-                if (!cantidades.ContainsKey(producto.id))
+                // Si el producto no está en 'cantidades', se añade con valor 1. Esto se usa para agregar productos al carrito, no 
+                // refleja la cantidad de producto disponible.
+                if (!prop.cantidades.ContainsKey(producto.id))
                 {
-                    cantidades[producto.id] = 1;
+                    prop.cantidades[producto.id] = 1;
                 }
             }
         }
-       /*
-       * 'ordenarPorPrecio' y 'ordenarPorPrecioAnterior' almacenan los criterios de ordenación actuales y anteriores, respectivamente.
-       * Los posibles criterios son 'asc' para ascendente, 'desc' para descendente y 'null' para no ordenado.
-       *
-       * Inicialmente, tanto 'ordenarPorPrecio' como 'ordenarPorPrecioAnterior' son 'null', lo que indica que los productos no están ordenados.
-       *
-       * Cuando se selecciona un criterio de ordenación (ascendente o descendente), 'ordenarPorPrecio' se actualiza al criterio seleccionado. 
-       * Por ejemplo, si se selecciona 'asc', 'ordenarPorPrecio' se convierte en 'asc'.
-       * Como 'ordenarPorPrecioAnterior' es 'null' (el estado anterior) y 'ordenarPorPrecio' es 'asc' (el estado actual), la condición se cumple 
-       * y se ordenan los productos por precio.
-       *
-       * Finalmente, 'ordenarPorPrecioAnterior' se actualiza al estado actual de 'ordenarPorPrecio', es decir, 'ordenarPorPrecioAnterior' se 
-       * convierte en 'asc'.
-        */
-        if (ordenarPorPrecio != ordenarPorPrecioAnterior)
+        // Ordenar por precio si el criterio ha cambiado, ordenarPorPrecio esta variable almacena el estado actual y ordenarPorPrecioAnterior
+        //almacena el estado anrior los criterios son:
+            //null--> no se ha usado el filtro.
+            //asc-->orden ascendente
+            //desc-->orden descente
+
+        if (prop.ordenarPorPrecio != prop.ordenarPorPrecioAnterior)
         {
             await OrdenarPorPrecio();
-            ordenarPorPrecioAnterior = ordenarPorPrecio;
+            prop.ordenarPorPrecioAnterior = prop.ordenarPorPrecio;
         }
-     /*
-     * 'idProveedor' y 'idProveedorAnterior' almacenan los ID del proveedor seleccionado actualmente y anteriormente, respectivamente.
-     * Inicialmente, ambos son 0 porque ningún proveedor ha sido seleccionado.
-     *
-     * Cuando se selecciona un proveedor, 'idProveedor' se actualiza al ID del proveedor seleccionado. Por ejemplo, si se selecciona el primer 
-     * proveedor, 'idProveedor' sería 1.
-     * Como 'idProveedorAnterior' es 0 (el estado anterior) y 'idProveedor' es 1 (el estado actual), la condición se cumple y se muestran los 
-     * productos del proveedor seleccionado.
-     *
-     * Finalmente, 'idProveedorAnterior' se actualiza al estado actual de 'idProveedor', es decir, 'idProveedorAnterior' se convierte en 1.
-        */
-        if (idProveedor != idProveedorAnterior)
+        // Filtrar por proveedor si el proveedor seleccionado ha cambiado. 'idProveedor' almacena el estado actual y 'idProveedorAnterior'
+        // almacena el estado anterior. Los posibles estados son:
+        // 0 --> ningún proveedor ha sido seleccionado.
+        // 1, 2, 3, etc. --> corresponde al ID del proveedor seleccionado.
+        if (prop.idProveedor != prop.idProveedorAnterior)
         {
             await OrdenarPorProveedor();
-            idProveedorAnterior = idProveedor;
+            prop.idProveedorAnterior = prop.idProveedor;
         }
     }
     private async Task OrdenarPorPrecio()
     {
-        var response = await http.GetAsync($"api/Producto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}&ordenarPorPrecio={ordenarPorPrecio}");
+        var response = await http.GetAsync($"api/Producto?pagina={prop.paginacion.Pagina}&CantidadAMostrar={prop.paginacion.CantidadAMostrar}&ordenarPorPrecio={prop.ordenarPorPrecio}");
         var content = await response.Content.ReadAsStringAsync();
-        productos = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
+        prop.productos = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
         /*Ha la hora de hacer la busqueda esto hay que ponerlo de nuevo para que se asigne bien las cantidades a cada producto
          * esto corresponde con la cantidad del producto que vas a mandar al carrito
         */
-        foreach(var producto in productos)
+        foreach(var producto in prop.productos)
         {
-            if (!cantidades.ContainsKey(producto.id))
+            if (!prop.cantidades.ContainsKey(producto.id))
             {
-                cantidades[producto.id] = 1;
+                prop.cantidades[producto.id] = 1;
             }
         }
     }
     private async Task OrdenarPorProveedor()
     {
-        if (idProveedor == 0)
+        //Si no se ha seleccionado ningun proveedor sale de esta funcion.
+        if (prop.idProveedor == 0)
         {
 
             return;
         }
-        var response = await http.GetAsync($"api/Producto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}&idProveedor={idProveedor}");
+        var response = await http.GetAsync($"api/Producto?pagina={prop.paginacion.Pagina}&CantidadAMostrar={prop.paginacion.CantidadAMostrar}&idProveedor={prop.idProveedor}");
         var content = await response.Content.ReadAsStringAsync();
-        productos = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
-        foreach (var producto in productos)
+        prop.productos = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
+        foreach (var producto in prop.productos)
         {
-            if (!cantidades.ContainsKey(producto.id))
+            if (!prop.cantidades.ContainsKey(producto.id))
             {
-                cantidades[producto.id] = 1;
+                prop.cantidades[producto.id] = 1;
             }
         }
     }
@@ -278,41 +229,37 @@
     }  
     private async Task PaginaSeleccionada(int pagina)
     {
-        Console.WriteLine($"Pagina seleccionada: {pagina}");
-        paginacion.Pagina = pagina;
-        productos = await GetProducto();
-        proveedores = await GetProveedores();
-        //El motivo por el que se pone este forech aqui es para mostrar la cantidad de la funcion de "Agregar producto" de los productos de 
-        //la pagina siguiente
-        foreach (var producto in productos)
+       
+        prop.paginacion.Pagina = pagina;
+        prop.productos = await GetProducto();
+        prop.proveedores = await GetProveedores();
+       /*Recorremos el array de productos y ha cada producto se le asigna una cantidad. Esta cantidad corresponde con los productos
+        * que se van ha agregar al carrito.
+        */
+        foreach (var producto in prop.productos)
         {
-            //Si no contiene la id de los productos de la pagina anterior
-            if (!cantidades.ContainsKey(producto.id))
+            if (!prop.cantidades.ContainsKey(producto.id))
             {
-                //Actualiza y muestrame la cantidad de productos de la pagina siguiente
-                cantidades[producto.id] = 1; 
+                prop.cantidades[producto.id] = 1; 
             }
         }
-        //devuelve la pagina actual en la que se encuentra el usuario
-        paginaActual = pagina;
-        Console.WriteLine($"Pagina actual después de la selección: {paginaActual}");
+        prop.paginaActual = pagina;
+        
     }
     private async Task AgregarAlCarrito(int idProducto)
     {
         // Obtiene la cantidad del diccionario 'cantidades' para pasar esas cantidades al carrito
-        int cantidad = cantidades[idProducto];
-        //Aqui tenemos una peticion un tanto especial como al json de la peticion necesitamos pasarle unas propiedades, pues con esta linea
-        //le ponemos las propiedades que queremos que tenga la peticion antes de hacerla en este caso para agregar un producto al carrito
-        //necesitamos la idProducto para saber que producto se agrego y la cantidad de ese producto esto lo transforma a json.
-        var content = new StringContent(JsonSerializer.Serialize(new { idProducto, cantidad }), Encoding.UTF8, "application/json");
-        Console.WriteLine("el id del producto es " + idProducto + "y su cantidad es " + cantidad);
-        Console.WriteLine("este es el contenido agregar carrito:" + content);
+        int cantidad = prop.cantidades[idProducto];
+        // Preparamos una petición especial donde necesitamos pasar ciertas propiedades en formato JSON.
+        // En este caso, para agregar un producto al carrito, necesitamos 'idProducto' y 'cantidad'.
+        // Esta línea de código crea el contenido de la petición serializando 'idProducto' y 'cantidad' a JSON.
+        var content = new StringContent(JsonSerializer.Serialize(new { idProducto, cantidad }), Encoding.UTF8, "application/json");   
         //Hace la peticion al servidor pasandole la idProducto y cantidad anteriormente serializada
         var response = await http.PostAsync("api/Producto/carrito", content);
         if (response.IsSuccessStatusCode)
         {
             //Si el producto se agrego correctamente muestra los productos con el nuevo producto
-            productos = await GetProducto();
+            prop.productos = await GetProducto();
         }
         else
         {
@@ -321,10 +268,23 @@
             ShowAlert(message);
         }
     }
+    private async Task LimpiarFiltros()
+    {
+        // Restablece las variables de filtro a sus valores predeterminados
+        prop.buscar = null;
+        prop.ordenarPorPrecio = null;
+        prop.ordenarPorPrecioAnterior = null;
+        prop.idProveedor = 0;
+        prop.idProveedorAnterior = 0;
+
+        // Obtiene todos los productos sin aplicar ningún filtro
+        prop.productos = await GetProducto();
+    }
+
     private void ShowAlert(string message)
     {
-        showAlert = true;
-        alertMessage = message;
+       prop.showAlert = true;
+        prop.alertMessage = message;
     }
 
 }
