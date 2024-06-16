@@ -34,26 +34,51 @@ namespace CRUDBlazor.Server.Infrastructure.Repositories
         }
         public async Task<(bool, string)> CrearProducto(ProductosViewModel model)
         {
-            var producto = new Producto()
+            var existeUsuario = _contextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int usuarioId;
+            if (int.TryParse(existeUsuario, out usuarioId))
             {
-                NombreProducto = model.nombreProducto,
-                Descripcion = model.descripcion,
-                Imagen = model.imagen,
-                Cantidad = model.cantidad,
-                Precio = model.precio,
-                IdProveedor = model.idProveedor,
+                var producto = new Producto()
+                {
+                    NombreProducto = model.nombreProducto,
+                    Descripcion = model.descripcion,
+                    Imagen = model.imagen,
+                    Cantidad = model.cantidad,
+                    Precio = model.precio,
+                    IdProveedor = model.idProveedor,
 
-            };
-            if (!string.IsNullOrEmpty(producto.Imagen))
-            {
-                var contenido = Convert.FromBase64String(producto.Imagen);
-                var extension = model.extension; // Aquí necesitarás determinar la extensión de alguna manera
-                producto.Imagen = await _gestorArchivos.GuardarArchivo(contenido, extension, "imagenes");
+                };
+                if (!string.IsNullOrEmpty(producto.Imagen))
+                {
+                    var contenido = Convert.FromBase64String(producto.Imagen);
+                    var extension = model.extension; // Aquí necesitarás determinar la extensión de alguna manera
+                    producto.Imagen = await _gestorArchivos.GuardarArchivo(contenido, extension, "imagenes");
+                }
+
+                _context.Add(producto);
+                await _context.SaveChangesAsync();
+                var historialProducto = new HistorialProducto()
+                {
+                    UsuarioId= usuarioId,
+                    Fecha= DateTime.Now,
+                    Accion= _contextAccessor.HttpContext.Request.Method.ToString(),
+                    Ip = _contextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString()
+                };
+                _context.Add(historialProducto);
+                await _context.SaveChangesAsync();
+                var detalleHistorialProducto = new DetalleHistorialProducto()
+                {
+                    HistorialProductoId = historialProducto.Id,
+                    Cantidad = producto.Cantidad,
+                    NombreProducto = producto.NombreProducto,
+                    Descripcion = producto.Descripcion,
+                    Precio = (decimal)producto.Precio,
+                };
+                _context.Add(detalleHistorialProducto);
+                await _context.SaveChangesAsync();
+
             }
-
-            _context.Add(producto);
-            await _context.SaveChangesAsync();
-
+               
             return (true,null);
         }
         public async Task<(bool, string)> EliminarProducto(string id)

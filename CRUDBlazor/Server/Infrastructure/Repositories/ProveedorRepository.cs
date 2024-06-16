@@ -8,10 +8,11 @@ namespace CRUDBlazor.Server.Infrastructure.Repositories
     public class ProveedorRepository:IProveedorRepository
     {
         private readonly DbcrudBlazorContext _context;
-
-        public ProveedorRepository(DbcrudBlazorContext context)
+        private readonly IHttpContextAccessor _contextAccessor;
+        public ProveedorRepository(DbcrudBlazorContext context, IHttpContextAccessor contextAccessor)
         {
             _context = context;
+            _contextAccessor = contextAccessor;
         }
         public IQueryable<Proveedore> ObtenerTodosProveedores()
         {
@@ -29,6 +30,7 @@ namespace CRUDBlazor.Server.Infrastructure.Repositories
             };
             _context.Proveedores.Add(proveedor);
             await _context.SaveChangesAsync();
+
             return (true,"https://localhost:7186/");
         }
         public async Task<Proveedore> ObtenerProveedorId(int id)

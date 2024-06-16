@@ -1,0 +1,90 @@
+﻿@page "/detalleHistorial/{id}"
+@using CRUDBlazor.Shared.Productos
+@using System.Text.Json
+@inject HttpClient http
+@inject NavigationManager navigation
+<h3>Detalle Historial Producto</h3>
+
+
+<table class="table table-striped table-bordered w-100">
+    <thead>
+        <tr>
+            <th class="col-2">Nombre del Producto</th>
+            <th class="col-2">Descripcion</th>
+            <th class="col-2">Cantidad</th>
+            <th class="col-2">Precio del producto</th>
+            <th class="col-2"> Precio sin IVA</th>
+            <th class="col-2">Precio con IVA (21%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var detalle in detalles)
+        {
+            <tr>
+                <td>@detalle.nombreProducto</td>
+                <td>@detalle.descripcion</td>
+                <td>@detalle.cantidad</td>
+                <td>@detalle.precio</td>
+                <td>@(detalle.cantidad * detalle.precio)</td>
+                <td>@(detalle.cantidad * (detalle.precio ?? 0) * (decimal)1.21)</td>
+
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    private DetalleHistorialProductoModel detalle = new DetalleHistorialProductoModel();
+    private DetalleHistorialProductoModel[] detalles = new DetalleHistorialProductoModel[0];
+    private Paginacion paginacion = new Paginacion();
+    private int paginaActual = 1;
+    private int paginasTotales;
+    private string buscar;
+    private bool showAlert = false;
+    private string alertMessage = "";
+    protected override async Task OnInitializedAsync()
+    {
+        detalles = await GetDetalleHistorial();
+    }
+    private async Task<DetalleHistorialProductoModel[]> GetDetalleHistorial()
+    {
+        string url = $"api/Producto/detalleHistorialProducto/{id}?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}";
+
+        var response = await http.GetAsync(url);
+        Console.WriteLine("La respuesta del detalle del historial es: " + response);
+
+        //Lee y serializa la petición
+        var content = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("La respuesta es: " + content);
+        /*NOVEDAD:
+         * El motivo por el cual tiene que ir asi sin ser un array es porque HistorialProductoResponse encapsula las propiedades en un
+         * array gracias ha  public DetalleHistorialProductoModel[] detalleHistorialProductos { get; set; } esto se tiene que hacer para
+         * mostrar todos los detalles del producto.
+         * DetalleHistorialProductoModel--> tiene las caracteristicas del historial del producto, representa un solo registro
+         * HistorialProductoResponse--> parecido al enterior pero tiene una propiedad public DetalleHistorialProductoModel[] detalleHistorialProductos { get; set; }
+         * que encapsula varios registros del historial.
+         * El motivo de porque se tiene que hacer esto es por como esta echo en el servidor ya que el servidor espera y devuelve un array de objetos
+         */
+        var historialProductoResponse = JsonSerializer.Deserialize<HistorialProductoResponse>(content);
+     
+        return historialProductoResponse.detalleHistorialProductos;
+    }
+
+    private async Task PaginaSeleccionada(int pagina)
+    {
+
+        paginacion.Pagina = pagina;
+        detalles = await GetDetalleHistorial();
+
+        paginaActual = pagina;
+
+    }
+}

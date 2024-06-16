@@ -1,5 +1,7 @@
-﻿using CRUDBlazor.Server.Helpers;
+﻿using CRUDBlazor.Server.Application.DTOs;
+using CRUDBlazor.Server.Helpers;
 using CRUDBlazor.Server.Interfaces;
+using CRUDBlazor.Server.Interfaces.Application;
 using CRUDBlazor.Server.Interfaces.Infrastructure;
 using CRUDBlazor.Server.Models;
 using CRUDBlazor.Shared;
@@ -20,12 +22,15 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
         private readonly IGestorArchivos _gestorArchivos;
         private readonly ILogger<ProductoController> _logger;
         private readonly IProductoRepository _productoRepository;
-        public ProductoController(DbcrudBlazorContext context, IGestorArchivos gestorArchivos, ILogger<ProductoController> logger, IProductoRepository producto)
+        private readonly IEmailService _emailService;
+        public ProductoController(DbcrudBlazorContext context, IGestorArchivos gestorArchivos, ILogger<ProductoController> logger, 
+            IProductoRepository producto, IEmailService email)
         {
             _context = context;
             _gestorArchivos = gestorArchivos;
             _logger = logger;
             _productoRepository = producto;
+            _emailService = email;
         }
 
         [HttpGet]
@@ -53,6 +58,7 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
                     productos = productos.Where(p => p.IdProveedor == idProveedor.Value);
                 }
                 // var productos = _context.Productos.Include(x => x.IdProveedorNavigation).AsQueryable();
+                await VerificarStock();
                 await HttpContext.InsertarParametrosPaginacionRespuesta(productos, paginacion.CantidadAMostrar);
                 var productoPaginado = productos.Paginar(paginacion).ToList();
                 var totalPaginas = HttpContext.Response.Headers["totalPaginas"].ToString();
@@ -65,8 +71,42 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
             }
            
         }
+        public async Task VerificarStock()
+        {
+            try
+            {
+                var emailUsuario = User.FindFirstValue(ClaimTypes.Email);
+
+                if (emailUsuario != null)
+                {
 
 
+                    var productos = from p in _context.Productos.Include(x => x.IdProveedorNavigation)
+                                    orderby p.Id
+                                    select p;
+
+
+                    foreach (var producto in productos)
+                    {
+                        if (producto.Cantidad < 10) // Define tu propio umbral
+                        {
+                            await _emailService.SendEmailAsyncLowStock(new DTOEmail
+                            {
+                                ToEmail = emailUsuario
+                            }, producto);
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+               
+                _logger.LogError("Error al verificar el stock", ex);
+                
+            }
+
+        } 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductoPorId(int id)
         {
@@ -80,10 +120,8 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
             {
                 _logger.LogError(ex, "Error al obtener el producto por la id");
                 return BadRequest("Error al obtener el producto por la id si el error persiste contacte con el administrador");
-            }
-            
+            }           
         }
-
         [HttpPost]
         public async Task<IActionResult> CrearProducto(ProductosViewModel model)
         {
@@ -108,9 +146,7 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
             {
                 _logger.LogError(ex, "Error al crear el producto");
                 return BadRequest("En estos momentos no se ha podido crear el producto si el error persiste contacte con el administrador del sitio");
-            }
-           
-          
+            }                  
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProducto(string id)
@@ -183,8 +219,32 @@ namespace CRUDBlazor.Server.Infrastructure.Controllers
             }
             
         }
-        
-
+        [HttpGet("historialProducto")]
+        public async Task<IActionResult> HistorialProducto(string? buscar,[FromQuery] Paginacion paginacion)
+        {
+            var historialProductos = from p in _context.HistorialProductos.Include(x => x.DetalleHistorialProductos)
+                                     select p;
+            if (!String.IsNullOrEmpty(buscar))
+            {
+                historialProductos= historialProductos.Where(p=>p.Accion.Contains(buscar)|| p.Ip.Contains(buscar));
+            }
+            await HttpContext.InsertarParametrosPaginacionRespuesta(historialProductos, paginacion.CantidadAMostrar);
+            var productos= historialProductos.Paginar(paginacion).ToList();
+            var totalPaginas = HttpContext.Response.Headers["totalPaginas"].ToString();
+            return Ok(await historialProductos.ToListAsync());
+        }
+        [HttpGet("detalleHistorialProducto/{id}")]
+        public async Task<IActionResult> DetallesHistorialProducto(string id)
+        {
+             int ide= int.Parse(id);
+            var historialProducto= await _context.HistorialProductos.Include(hp=>hp.DetalleHistorialProductos).FirstOrDefaultAsync(hp=>hp.Id== ide);
+            if(historialProducto == null)
+            {
+                return BadRequest("No hay detalles del producto");
+            }
+            //Cuando no se especifica el tipo de dato que devuelve o recibe el servidor siempre esperara un array de objetos
+            return Ok(historialProducto);
+        }
 
 
     }

@@ -1,0 +1,127 @@
+﻿@page "/historialproducto"
+@using CRUDBlazor.Shared.Productos
+@using System.Text.Json
+@inject NavigationManager navigation
+@inject HttpClient http
+<h3>Historial Productos</h3>
+<div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+    @if (historiales== null)
+    {
+        <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+        </div>
+    }
+    else
+    {
+        <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+        <EditForm Model="this" OnValidSubmit="GetBuscarHistorialProducto">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <InputText id="buscar" @bind-Value="buscar" class="form-control" placeholder="Buscar historial" />            
+            <button type="submit" class="btn btn-primary mt-2">Buscar</button>
+        </EditForm>
+        @foreach(var historial in historiales)
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Datos del Historial</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Ip: </strong> @historial.ip</p>
+                    <p class="card-text"><strong>Accion:</strong> @historial.accion</p>             
+                    <p class="card-text"><strong>Fecha:</strong> @historial.fecha</p>
+                    <p class="card-text"><strong>Id Usuario:</strong> @historial.usuarioId</p>
+                 
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+
+                    <div>
+                        <AuthorizeView Roles="administrador">
+                            <a href="/detalleHistorial/@historial.id" class="btn btn-info mt-2 ml-2">Detalle historial</a>
+                        </AuthorizeView>
+                       
+                    </div>
+                   
+                    @if (showAlert)
+                    {
+                        <div class="alert alert-danger mt-2" role="alert">
+                            @alertMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private HistorialProductoModel historial = new HistorialProductoModel();
+    private HistorialProductoModel[] historiales = new HistorialProductoModel[0];
+    private Paginacion paginacion = new Paginacion();
+    private int paginaActual = 1;
+    private int paginasTotales;
+    private string buscar;
+    private bool showAlert = false;
+    private string alertMessage = "";
+    protected override async Task OnInitializedAsync()
+    {
+        historiales = await GetHistorial();
+
+    }
+    private async Task<HistorialProductoModel[]> GetHistorial()
+    {
+        string url = $"api/Producto/historialProducto?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}";
+
+        var response = await http.GetAsync(url);
+        //Si la respuesta es válida...
+        if (response.IsSuccessStatusCode)
+        {
+            //Muestra el número de páginas totales almacenado en la cabecera de la petición
+            paginasTotales = int.Parse(response.Headers.GetValues("totalPaginas").FirstOrDefault());
+        }
+        //Lee y serializa la petición
+        var content = await response.Content.ReadAsStringAsync();
+        //Deserializa la respuesta del servidor para mostrar los datos al usuario.
+        return JsonSerializer.Deserialize<HistorialProductoModel[]>(content);
+    }
+    private async Task GetBuscarHistorialProducto()
+    {
+        buscar = buscar ?? string.Empty;
+        if (string.IsNullOrEmpty(buscar))
+        {
+            // ...se llama a la función GetProducto() para obtener todos los productos
+            historiales = await GetHistorial();
+        }
+        else
+        {
+            List<HistorialProductoModel> todoElHistorial = new List<HistorialProductoModel>();
+            for (int i = 1; i <= paginasTotales; i++)
+            {
+                // Realizar una petición GET para cada página
+                var response = await http.GetAsync($"api/Producto?pagina={i}&CantidadAMostrar={paginacion.CantidadAMostrar}&buscar={buscar}");
+                //Lee y serializa la respuesta
+                var content = await response.Content.ReadAsStringAsync();
+                //Se deserializa la respuesta
+                var productosEnPagina = JsonSerializer.Deserialize<HistorialProductoModel[]>(content);
+                // Se añaden los productos encontrados en la página actual a la lista de 'todosLosProductos'
+                todoElHistorial.AddRange(productosEnPagina);
+            }
+            historiales = todoElHistorial.ToArray();
+        }
+
+    }
+    private async Task PaginaSeleccionada(int pagina)
+    {
+
+        paginacion.Pagina = pagina;
+        historiales = await GetHistorial();
+
+        paginaActual = pagina;
+
+    }
+    private void ShowAlert(string message)
+    {
+        showAlert = true;
+        alertMessage = message;
+    }
+}

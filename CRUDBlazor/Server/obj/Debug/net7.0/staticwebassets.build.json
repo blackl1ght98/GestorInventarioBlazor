@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "3Xl2IeIZEvsZv7jxci5JBKIggsbOEPwYo0A/7gMe9k0=",
+  "Hash": "JY7cxFck2uCR2qvBHPB+LFBRuzlxFiNp4NfH7MuZ3yE=",
   "Source": "CRUDBlazor.Server",
   "BasePath": "_content/CRUDBlazor.Server",
   "Mode": "Default",
@@ -8584,6 +8584,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\imagenes\\5d60e67d-7a97-425b-94b4-feb06267cad7.jpeg"
+    },
+    {
+      "Identity": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Server\\wwwroot\\imagenes\\608fa1cc-1554-4f27-9bcd-bb1e2c62032a.jpeg",
+      "SourceId": "CRUDBlazor.Server",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Server\\wwwroot\\",
+      "BasePath": "_content/CRUDBlazor.Server",
+      "RelativePath": "imagenes/608fa1cc-1554-4f27-9bcd-bb1e2c62032a.jpeg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\imagenes\\608fa1cc-1554-4f27-9bcd-bb1e2c62032a.jpeg"
     },
     {
       "Identity": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Server\\wwwroot\\imagenes\\68e4c3ff-48f4-4ec6-aa8b-2c220a501762.PNG",

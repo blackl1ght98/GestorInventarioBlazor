@@ -889,25 +889,25 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-fXq1041vKPNCTecrbxKmzck2sG4McXiMPo4if8oVUNg=",
+      "hash": "sha256-kNWtMhdJi9nU8TQK2G\/cCLpk7wuLpVE8UUqrIJL5RF4=",
       "url": "_framework\/CRUDBlazor.Shared.dll"
     },
     {
-      "hash": "sha256-iNh1+xSSNTjX2iF85cD8DSkXzjFgurfl2rW95niSiXs=",
+      "hash": "sha256-azLv5abuvJdHJmqFZwnDI+l48fhx3XMYFX4ekY6Tfnw=",
       "url": "_framework\/CRUDBlazor.Shared.pdb"
     },
     {
-      "hash": "sha256-iXuDtE3fzY5d92D+XSXVgMaaUCiH3sde8dmCgFHSgJg=",
+      "hash": "sha256-beAOv7eALo6FnkCrvWM7cRD5MYXMgyQL8gpUQZDzvOA=",
       "url": "_framework\/CRUDBlazor.Client.dll"
     },
     {
-      "hash": "sha256-NikAYOr\/8Mpt\/SghvNyqznpjNtQEJnSLLun9kybvPFU=",
+      "hash": "sha256-CK1BfFmXVIbK3SNKiVNUuSyfO7H9oXNzc0Z1AMNGuCA=",
       "url": "_framework\/CRUDBlazor.Client.pdb"
     },
     {
-      "hash": "sha256-YrBcPKnww8MntSKEs\/XMmLACIyVym6K3hk33L+UDZkc=",
+      "hash": "sha256-Ri2MONOnfuUhZOdq7dSzUDd8x9udHXnncman+i6OkRo=",
       "url": "_framework\/blazor.boot.json"
     }
   ],
-  "version": "ZGcUvjoZ"
+  "version": "00TZFq8Q"
 };

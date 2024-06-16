@@ -19,7 +19,11 @@ public partial class DbcrudBlazorContext : DbContext
 
     public virtual DbSet<Departamento> Departamentos { get; set; }
 
+    public virtual DbSet<DetalleHistorialProducto> DetalleHistorialProductos { get; set; }
+
     public virtual DbSet<DetallePedido> DetallePedidos { get; set; }
+
+    public virtual DbSet<HistorialProducto> HistorialProductos { get; set; }
 
     public virtual DbSet<ItemsDelCarrito> ItemsDelCarritos { get; set; }
 
@@ -63,6 +67,23 @@ public partial class DbcrudBlazorContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<DetalleHistorialProducto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__DetalleH__3214EC07A0700910");
+
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.NombreProducto)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Precio).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.HistorialProducto).WithMany(p => p.DetalleHistorialProductos)
+                .HasForeignKey(d => d.HistorialProductoId)
+                .HasConstraintName("FK__DetalleHi__Histo__3F115E1A");
+        });
+
         modelBuilder.Entity<DetallePedido>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__DetalleP__3214EC07B8355AD5");
@@ -76,6 +97,23 @@ public partial class DbcrudBlazorContext : DbContext
             entity.HasOne(d => d.Producto).WithMany(p => p.DetallePedidos)
                 .HasForeignKey(d => d.ProductoId)
                 .HasConstraintName("FK__DetallePe__Produ__19DFD96B");
+        });
+
+        modelBuilder.Entity<HistorialProducto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3214EC079B1BB257");
+
+            entity.Property(e => e.Accion)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Fecha).HasColumnType("datetime");
+            entity.Property(e => e.Ip)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.HistorialProductos)
+                .HasForeignKey(d => d.UsuarioId)
+                .HasConstraintName("FK_UsuarioId");
         });
 
         modelBuilder.Entity<ItemsDelCarrito>(entity =>
