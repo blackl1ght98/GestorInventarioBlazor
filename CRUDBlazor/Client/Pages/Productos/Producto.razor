@@ -87,6 +87,7 @@
 </div>
 <a href="/crearproducto" class="btn btn-info">Crear Producto</a>
 @code {
+    private List<ProductosViewModel> todosLosProductos = new List<ProductosViewModel>();
     protected override async Task OnInitializedAsync()
     {
         //Al array que inicialmete esta vacio se le asigna los productos que debe mostrar
@@ -126,51 +127,45 @@
         return JsonSerializer.Deserialize<ProductosViewModel[]>(content);
     }
  
+ 
+   
+
     private async Task GetBuscarProducto()
     {
-        // Si 'buscar' es null, se convierte en una cadena vacía
         prop.buscar = prop.buscar ?? string.Empty;
-        // Si el campo de búsqueda está vacío...
         if (string.IsNullOrEmpty(prop.buscar))
         {
-            // ...se llama a la función GetProducto() para obtener todos los productos
             prop.productos = await GetProducto();
         }
         else
         {
-            // Se crea una lista para almacenar todos los productos encontrados
-            List<ProductosViewModel> todosLosProductos = new List<ProductosViewModel>();
-            // Este bucle recorre todas las páginas de productos
+            todosLosProductos.Clear();
             for (int i = 1; i <= prop.paginasTotales; i++)
             {
-                // Realizar una petición GET para cada página
                 var response = await http.GetAsync($"api/Producto?pagina={i}&CantidadAMostrar={prop.paginacion.CantidadAMostrar}&buscar={prop.buscar}&idProveedor={prop.idProveedor}");
-                //Lee y serializa la respuesta
                 var content = await response.Content.ReadAsStringAsync();
-                //Se deserializa la respuesta
                 var productosEnPagina = JsonSerializer.Deserialize<ProductosViewModel[]>(content);
-                // Se añaden los productos encontrados en la página actual a la lista de 'todosLosProductos'
                 todosLosProductos.AddRange(productosEnPagina);
             }
-            // Convertir la lista a un array y actualizar 'productos'
-            prop.productos = todosLosProductos.ToArray();
-            // Actualizar 'cantidades' para los nuevos productos
-            foreach (var producto in prop.productos)
-            {
-                // Si el producto no está en 'cantidades', se añade con valor 1. Esto se usa para agregar productos al carrito, no 
-                // refleja la cantidad de producto disponible.
-                if (!prop.cantidades.ContainsKey(producto.id))
-                {
-                    prop.cantidades[producto.id] = 1;
-                }
-            }
+            /*Math.Ceiling() es una funcion que redondea un número decimal hacia arriba al próximo número entero.
+             * Por ejemplo si tiene el numero 2,3 si aplicas esta funcion te dara como resultado 3.
+             * 1º Hacemos una conversion explicita sobre el resultado que de Math.Ceiling()
+             * 2º Dentro de la funcion Math.Ceiling() hacemos una conversion explicita a double que double sirve para trabajar con numeros
+             * decimales y Math.Ceiling() necesita de decimales para funcionar y como estamos trabajando con cantidades enteras
+             * necesitamos convertir ese entero a decimal y lo que hacemos es tomar el total de productos que halla con
+             * (double)todosLosProductos.Count y con double al principio convertimos ese entero de manera explicita a decimal y lo dividimos
+             * entre 2 que es la cantidad de registros a mostrar que es la cantidad por defecto que tenemos y de lo que salga de esta division
+             * pues redondeea al numero decimal hacia arriba mas proximo.
+             *  Por ejemplo, si el resultado de esta división es 5.3, esta función devolverá 6
+             */
+            prop.paginasTotales = (int)Math.Ceiling((double)todosLosProductos.Count / prop.paginacion.CantidadAMostrar);
+            MostrarProductosPorPagina();
         }
         // Ordenar por precio si el criterio ha cambiado, ordenarPorPrecio esta variable almacena el estado actual y ordenarPorPrecioAnterior
-        //almacena el estado anrior los criterios son:
-            //null--> no se ha usado el filtro.
+              //almacena el estado anrior los criterios son:
+             //null--> no se ha usado el filtro.
             //asc-->orden ascendente
-            //desc-->orden descente
-
+           //desc-->orden descente
         if (prop.ordenarPorPrecio != prop.ordenarPorPrecioAnterior)
         {
             await OrdenarPorPrecio();
@@ -186,6 +181,59 @@
             prop.idProveedorAnterior = prop.idProveedor;
         }
     }
+
+    private void MostrarProductosPorPagina()
+    {
+        /* Paginacion.pagina lo tenemos por defecto en 1 y paraginacion.cantidad a mostrar en 2 por defecto.
+         * Esta primera línea de inicio pues primero hace una resta y de lo que salga de esa resta lo multiplica por 2.
+         * Por ejemplo, si estamos en la página 2, la resta sería 2-1=1 y la multiplicación 1*2=2.
+         */
+        int inicio = (prop.paginacion.Pagina - 1) * prop.paginacion.CantidadAMostrar;
+        /* Luego aquí toma el valor que haya salido de la variable inicio que es 2 y suma la cantidad a mostrar que es 4 porque 2+2=4.
+         * Recordemos que la cantidad a mostrar es 2 por defecto.
+         */
+        //Esta variable no se esta usando pero se podria usar para limitar el numero de resultados de la busqueda
+        int fin = inicio + prop.paginacion.CantidadAMostrar;
+        /* Pues teniendo esas dos operaciones hechas pues toma todos los productos que hayan salido del resultado de búsqueda y cuando
+         * cambiamos de página salta los 2 primeros registros y toma los dos siguientes.
+         * En realidad, la función Take() toma la cantidad de registros a mostrar, no la diferencia entre fin e inicio.
+         */
+        prop.productos = todosLosProductos.Skip(inicio).Take(prop.paginacion.CantidadAMostrar).ToArray();
+        foreach (var producto in prop.productos)
+        {
+            if (!prop.cantidades.ContainsKey(producto.id))
+            {
+                prop.cantidades[producto.id] = 1;
+            }
+        }
+    }
+    // private void MostrarProductosPorPagina()
+    // {
+    //     // Calcula el índice de inicio basado en la página actual y la cantidad de productos a mostrar por página
+    //     int inicio = (prop.paginacion.Pagina - 1) * prop.paginacion.CantidadAMostrar;
+
+    //     // Define el número máximo de resultados que quieres mostrar
+    //     int fin = 100; 
+
+    //     // Calcula cuántos productos tomar, teniendo en cuenta el límite máximo
+    //     int cantidadAMostrar = Math.Min(fin - inicio, prop.paginacion.CantidadAMostrar);
+
+    //     // Asegúrate de que la cantidad a mostrar no exceda el número total de productos
+    //     cantidadAMostrar = Math.Min(cantidadAMostrar, todosLosProductos.Count - inicio);
+
+    //     // Toma los productos correspondientes a la página actual, sin exceder el límite máximo
+    //     prop.productos = todosLosProductos.Skip(inicio).Take(cantidadAMostrar).ToArray();
+
+    //     foreach (var producto in prop.productos)
+    //     {
+    //         if (!prop.cantidades.ContainsKey(producto.id))
+    //         {
+    //             prop.cantidades[producto.id] = 1;
+    //         }
+    //     }
+    // }
+
+
     private async Task OrdenarPorPrecio()
     {
         var response = await http.GetAsync($"api/Producto?pagina={prop.paginacion.Pagina}&CantidadAMostrar={prop.paginacion.CantidadAMostrar}&ordenarPorPrecio={prop.ordenarPorPrecio}");
@@ -233,6 +281,8 @@
         prop.paginacion.Pagina = pagina;
         prop.productos = await GetProducto();
         prop.proveedores = await GetProveedores();
+        await GetBuscarProducto();
+
        /*Recorremos el array de productos y ha cada producto se le asigna una cantidad. Esta cantidad corresponde con los productos
         * que se van ha agregar al carrito.
         */
@@ -276,9 +326,16 @@
         prop.ordenarPorPrecioAnterior = null;
         prop.idProveedor = 0;
         prop.idProveedorAnterior = 0;
-
         // Obtiene todos los productos sin aplicar ningún filtro
         prop.productos = await GetProducto();
+        foreach (var producto in prop.productos)
+        {
+            if (!prop.cantidades.ContainsKey(producto.id))
+            {
+                prop.cantidades[producto.id] = 1;
+            }
+        }
+       
     }
 
     private void ShowAlert(string message)

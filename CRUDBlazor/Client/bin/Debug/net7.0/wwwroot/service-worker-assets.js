@@ -49,6 +49,10 @@
       "url": "css\/open-iconic\/README.md"
     },
     {
+      "hash": "sha256-cPSdfAbC3t\/3z4irI22bndRRBxghCT7eNswfPp1qohk=",
+      "url": "download.js"
+    },
+    {
       "hash": "sha256-4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg=",
       "url": "favicon.png"
     },
@@ -61,7 +65,7 @@
       "url": "icon-512.png"
     },
     {
-      "hash": "sha256-CLEeO47xAsy6a5B1urPpbpCeCoc5vnBoe1e1hqK3KZY=",
+      "hash": "sha256-TU5Sodspqll9Xj82Zpbx7dWKAhGz101qka+qHpORQvM=",
       "url": "index.html"
     },
     {
@@ -889,25 +893,25 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-kNWtMhdJi9nU8TQK2G\/cCLpk7wuLpVE8UUqrIJL5RF4=",
+      "hash": "sha256-W4ZaEtRrkLSciz1J3bMLJZ1Y4eKlqdwkTj44K7qo+P8=",
       "url": "_framework\/CRUDBlazor.Shared.dll"
     },
     {
-      "hash": "sha256-azLv5abuvJdHJmqFZwnDI+l48fhx3XMYFX4ekY6Tfnw=",
+      "hash": "sha256-DnrMwiKl\/ovoBNGzKiUMNpt+F8AYxx4aS9dfGo02+iQ=",
       "url": "_framework\/CRUDBlazor.Shared.pdb"
     },
     {
-      "hash": "sha256-beAOv7eALo6FnkCrvWM7cRD5MYXMgyQL8gpUQZDzvOA=",
+      "hash": "sha256-omw1eolBUBLahYmfQSKojdLwL2a7nWisJVrUICt8ckE=",
       "url": "_framework\/CRUDBlazor.Client.dll"
     },
     {
-      "hash": "sha256-CK1BfFmXVIbK3SNKiVNUuSyfO7H9oXNzc0Z1AMNGuCA=",
+      "hash": "sha256-kCXeHCp4kLcrlCxMIoQQsUzsIJBoS5R1exE8UqFsVO0=",
       "url": "_framework\/CRUDBlazor.Client.pdb"
     },
     {
-      "hash": "sha256-Ri2MONOnfuUhZOdq7dSzUDd8x9udHXnncman+i6OkRo=",
+      "hash": "sha256-yYpkjF40JpjJsMMGe25iNAixnj0gokWTAPwfxt2Ep70=",
       "url": "_framework\/blazor.boot.json"
     }
   ],
-  "version": "00TZFq8Q"
+  "version": "RVBrSJN\/"
 };

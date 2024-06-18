@@ -168,6 +168,10 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
+            "Aspose.PDF": {
+              "target": "Package",
+              "version": "[24.6.0, )"
+            },
             "MailKit": {
               "target": "Package",
               "version": "[4.4.0, )"

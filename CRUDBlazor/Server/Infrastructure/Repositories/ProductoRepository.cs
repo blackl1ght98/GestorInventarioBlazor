@@ -2,6 +2,7 @@
 using CRUDBlazor.Server.Interfaces;
 using CRUDBlazor.Server.Interfaces.Infrastructure;
 using CRUDBlazor.Server.Models;
+using CRUDBlazor.Server.Models.ViewModels;
 using CRUDBlazor.Shared.Productos;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -83,45 +84,136 @@ namespace CRUDBlazor.Server.Infrastructure.Repositories
         }
         public async Task<(bool, string)> EliminarProducto(string id)
         {
-            int idInt = int.Parse(id);
-            var producto = await _context.Productos.Include(dp => dp.DetallePedidos)
-                .ThenInclude(p => p.Pedido).Include(p => p.IdProveedorNavigation)
-                .FirstOrDefaultAsync(x => x.Id == idInt);
-            if (producto == null)
+
+            var existeUsuario = _contextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int usuarioId;
+            if (int.TryParse(existeUsuario, out usuarioId))
             {
-                return (false,"El producto que intenta eliminar no se encuentra");
+                int idInt = int.Parse(id);
+                var producto = await _context.Productos.Include(dp => dp.DetallePedidos)
+                    .ThenInclude(p => p.Pedido).Include(p => p.IdProveedorNavigation)
+                    .FirstOrDefaultAsync(x => x.Id == idInt);
+                if (producto == null)
+                {
+                    return (false, "El producto que intenta eliminar no se encuentra");
+                }
+                var productoOriginal = new ViewModelProducto()
+                {
+                    Id = producto.Id,
+                    NombreProducto = producto.NombreProducto,
+                    Descripcion = producto.Descripcion,
+                    Cantidad = producto.Cantidad,
+                    Precio = (decimal)producto.Precio,
+                };
+                var historialProducto = new HistorialProducto()
+                {
+                    UsuarioId = usuarioId,
+                    Fecha = DateTime.Now,
+                    Accion = "DELETE",
+                    Ip = _contextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString()
+                };
+                _context.Add(historialProducto);
+                await _context.SaveChangesAsync();
+                var detalleHistorial = new DetalleHistorialProducto()
+                {
+                    HistorialProductoId = historialProducto.Id,
+                    Cantidad = productoOriginal.Cantidad,
+                    NombreProducto = productoOriginal.NombreProducto,
+                    Descripcion = productoOriginal.Descripcion,
+                    Precio = productoOriginal.Precio
+                };
+                _context.Add(detalleHistorial);
+                await _context.SaveChangesAsync();
+                if (producto.DetallePedidos.Any())
+                {
+                    return (false, "El producto no se puede eliminar porque tiene pedidos asociados");
+                }
+                _context.Productos.Remove(producto);
+                await _context.SaveChangesAsync();
             }
-            if (producto.DetallePedidos.Any())
-            {
-                return (false,"El producto no se puede eliminar porque tiene pedidos asociados");
-            }
-            _context.Productos.Remove(producto);
-            await _context.SaveChangesAsync();
+              
             return (true,"Producto eliminado con exito");
         }
         public async Task<(bool, string)> EditarProducto(ProductosViewModel model)
         {
-            var producto = await _context.Productos.FirstOrDefaultAsync(x => x.Id == model.id);
-            if (producto == null)
+            var existeUsuario = _contextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int usuarioId;
+            if (int.TryParse(existeUsuario, out usuarioId))
             {
-                return (false,"Producto no encontrado");
+                var producto = await _context.Productos.FirstOrDefaultAsync(x => x.Id == model.id);
+                if (producto == null)
+                {
+                    return (false, "Producto no encontrado");
+                }
+                var productoOriginal = new ViewModelProducto()
+                {
+                    Id = producto.Id,
+                    NombreProducto = producto.NombreProducto,
+                    Descripcion = producto.Descripcion,
+                    Cantidad = producto.Cantidad,
+                    Precio = (decimal)producto.Precio,
+                    Imagen = producto.Imagen,
+                    IdProveedor = producto.IdProveedor
+                };
+                var historialProductoPostActualizacion = new HistorialProducto
+                {
+                    Fecha = DateTime.Now,
+                    UsuarioId = usuarioId,
+                    Accion = "Antes-PUT",
+                    Ip = _contextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString()
+                };
+                _context.Add(historialProductoPostActualizacion);
+                await _context.SaveChangesAsync();
+                var detalleHistorialProductoPostActualizacion = new DetalleHistorialProducto
+                {
+                    HistorialProductoId = historialProductoPostActualizacion.Id,
+
+                    Cantidad = productoOriginal.Cantidad,
+                    NombreProducto = productoOriginal.NombreProducto,
+                    Descripcion = productoOriginal.Descripcion,
+                    Precio = productoOriginal.Precio,
+                };
+                _context.Add(detalleHistorialProductoPostActualizacion);
+                await _context.SaveChangesAsync();
+                producto.NombreProducto = model.nombreProducto;
+                producto.Descripcion = model.descripcion;
+                producto.Cantidad = model.cantidad;
+                producto.Precio = model.precio;
+                producto.IdProveedor = model.idProveedor;
+                if (!string.IsNullOrEmpty(model.imagen) && IsBase64String(model.imagen))
+                {
+                    var contenido = Convert.FromBase64String(model.imagen);
+                    var extension = model.extension; // Aquí necesitarás determinar la extensión de alguna manera
+                    await _gestorArchivos.BorrarArchivo(producto.Imagen, "imagenes");
+                    producto.Imagen = await _gestorArchivos.GuardarArchivo(contenido, extension, "imagenes");
+                }
+                // Si model.imagen es null o una URL, no cambies producto.Imagen
+                _context.Productos.Update(producto);
+                await _context.SaveChangesAsync();
+                var historialProducto = new HistorialProducto
+                {
+                    Fecha = DateTime.Now,
+                    UsuarioId = usuarioId,
+                    Accion = "Despues-PUT",
+                    Ip = _contextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString()
+                };
+                _context.Add(historialProducto);
+                await _context.SaveChangesAsync();
+                var detalleHistorialProducto = new DetalleHistorialProducto
+                {
+                    HistorialProductoId = historialProducto.Id,
+
+                    Cantidad = producto.Cantidad,
+                    NombreProducto = producto.NombreProducto,
+                    Descripcion = producto.Descripcion,
+                    Precio = (decimal)producto.Precio,
+                };
+                _context.Add(detalleHistorialProducto);
+                await _context.SaveChangesAsync();
+                return (true, "Producto actualizado con exito");
             }
-            producto.NombreProducto = model.nombreProducto;
-            producto.Descripcion = model.descripcion;
-            producto.Cantidad = model.cantidad;
-            producto.Precio = model.precio;
-            producto.IdProveedor = model.idProveedor;
-            if (!string.IsNullOrEmpty(model.imagen) && IsBase64String(model.imagen))
-            {
-                var contenido = Convert.FromBase64String(model.imagen);
-                var extension = model.extension; // Aquí necesitarás determinar la extensión de alguna manera
-                await _gestorArchivos.BorrarArchivo(producto.Imagen, "imagenes");
-                producto.Imagen = await _gestorArchivos.GuardarArchivo(contenido, extension, "imagenes");
-            }
-            // Si model.imagen es null o una URL, no cambies producto.Imagen
-            _context.Productos.Update(producto);
-            await _context.SaveChangesAsync();
-            return (true,"Producto actualizado con exito");
+            return (false, "Usuario no autenticado");
+            
         }
         private bool IsBase64String(string s)
         {

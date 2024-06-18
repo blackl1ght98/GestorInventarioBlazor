@@ -69,6 +69,10 @@
       "PackagePath": "staticwebassets\\css\\open-iconic\\font\\fonts\\open-iconic.woff"
     },
     {
+      "Id": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\wwwroot\\download.js",
+      "PackagePath": "staticwebassets\\download.js"
+    },
+    {
       "Id": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\wwwroot\\favicon.png",
       "PackagePath": "staticwebassets\\favicon.png"
     },

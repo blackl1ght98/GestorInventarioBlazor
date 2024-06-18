@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "ZMqZqIRdbZNqawZw0EXn3HLpByFyG5HXgpDaCetfXxg=",
+  "Hash": "Oh1EKO61APzcUCtUlVf2rDWTvG5+/PEe9AkLdlJqM88=",
   "Source": "CRUDBlazor.Client",
   "BasePath": "/",
   "Mode": "Root",
@@ -8299,6 +8299,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\open-iconic\\README.md"
+    },
+    {
+      "Identity": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\wwwroot\\download.js",
+      "SourceId": "CRUDBlazor.Client",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "download.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\download.js"
     },
     {
       "Identity": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\wwwroot\\favicon.png",

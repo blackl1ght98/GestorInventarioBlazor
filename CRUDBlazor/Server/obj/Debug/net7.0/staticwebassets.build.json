@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "JY7cxFck2uCR2qvBHPB+LFBRuzlxFiNp4NfH7MuZ3yE=",
+  "Hash": "9fsxndLwZxUjCuQ8fpl+VJ80gAQJ6COWzgvO6v8oMlA=",
   "Source": "CRUDBlazor.Server",
   "BasePath": "_content/CRUDBlazor.Server",
   "Mode": "Default",
@@ -8301,6 +8301,25 @@
       "OriginalItemSpec": "wwwroot\\css\\open-iconic\\README.md"
     },
     {
+      "Identity": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\wwwroot\\download.js",
+      "SourceId": "CRUDBlazor.Client",
+      "SourceType": "Project",
+      "ContentRoot": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "download.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\download.js"
+    },
+    {
       "Identity": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\wwwroot\\favicon.png",
       "SourceId": "CRUDBlazor.Client",
       "SourceType": "Project",
@@ -8717,6 +8736,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\imagenes\\a007ee4a-2149-4465-9119-6a51ab621bd8.jpg"
+    },
+    {
+      "Identity": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Server\\wwwroot\\imagenes\\aa4eaf36-e714-4f36-88d3-42e2f260c603.jpeg",
+      "SourceId": "CRUDBlazor.Server",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Server\\wwwroot\\",
+      "BasePath": "_content/CRUDBlazor.Server",
+      "RelativePath": "imagenes/aa4eaf36-e714-4f36-88d3-42e2f260c603.jpeg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\imagenes\\aa4eaf36-e714-4f36-88d3-42e2f260c603.jpeg"
     },
     {
       "Identity": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Server\\wwwroot\\imagenes\\b7f42b38-aeec-4c37-8cee-907545855091.jpeg",
