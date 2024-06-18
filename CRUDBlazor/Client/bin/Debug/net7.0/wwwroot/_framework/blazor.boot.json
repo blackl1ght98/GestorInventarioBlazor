@@ -1,7 +1,7 @@
 {
   "entryAssembly": "CRUDBlazor.Client",
   "resources": {
-    "hash": "sha256-P5KRx//SbcFU9SqDTQgcAgQLWzLnVMsxfvA+Fj5u5iQ=",
+    "hash": "sha256-5JtoQHJ8gJPSIcHh2ZoKO9Va7jB4EP/S1NYpuy8kwjU=",
     "runtime": {
       "dotnet.7.0.20.98u3fi80sv.js": "sha256-eaJTmow4t8eE7FZMZR5Ja41JMOefGCbIYDTdpclGsac=",
       "dotnet.timezones.blat": "sha256-gbATD5HDsHYtW8vdPYh9iSBY4O5CjvMeCSF5xXWF1xo=",
@@ -209,11 +209,11 @@
       "netstandard.dll": "sha256-N5CcC3sLzGBesbmeJAp5bwxABN9u7SwkIO5qfFjzoik=",
       "System.Private.CoreLib.dll": "sha256-bJS1DJmhjP7PvegYG+Z8O9EDtRY78HKinA3LUMVLlSQ=",
       "CRUDBlazor.Shared.dll": "sha256-W4ZaEtRrkLSciz1J3bMLJZ1Y4eKlqdwkTj44K7qo+P8=",
-      "CRUDBlazor.Client.dll": "sha256-W/HS5fHj2nHuxrZIwjdWIWSFAQ2rHQ4nL2Qn4lrfMAI="
+      "CRUDBlazor.Client.dll": "sha256-yabETd4HD6wdsFppL5oghynPCpPOFxR+6cU7777wH7E="
     },
     "pdb": {
       "CRUDBlazor.Shared.pdb": "sha256-DnrMwiKl/ovoBNGzKiUMNpt+F8AYxx4aS9dfGo02+iQ=",
-      "CRUDBlazor.Client.pdb": "sha256-eJyCc9iNSlAwD1sJEbK1559p9hR1zrhGhGUCOdoGmCk="
+      "CRUDBlazor.Client.pdb": "sha256-Akj2SJkYN646EzgcH7r2P5qz/zHhIdjW438iR5eBBzM="
     },
     "runtimeAssets": {
       "dotnet.wasm": {

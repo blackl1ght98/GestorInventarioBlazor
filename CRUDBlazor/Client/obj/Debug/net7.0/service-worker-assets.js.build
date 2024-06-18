@@ -901,17 +901,17 @@
       "url": "_framework\/CRUDBlazor.Shared.pdb"
     },
     {
-      "hash": "sha256-omw1eolBUBLahYmfQSKojdLwL2a7nWisJVrUICt8ckE=",
+      "hash": "sha256-3DLL9HrrPyAtn1eki0bibHkSwQIwHGwdQCdE0uQ4Gp8=",
       "url": "_framework\/CRUDBlazor.Client.dll"
     },
     {
-      "hash": "sha256-kCXeHCp4kLcrlCxMIoQQsUzsIJBoS5R1exE8UqFsVO0=",
+      "hash": "sha256-BoPgpoPCOZOiVZNLOczdqk5u77GUh5TGMvaB89VDuQQ=",
       "url": "_framework\/CRUDBlazor.Client.pdb"
     },
     {
-      "hash": "sha256-yYpkjF40JpjJsMMGe25iNAixnj0gokWTAPwfxt2Ep70=",
+      "hash": "sha256-dYRNREatrrYrZqOEKK1pDmEgvaWGBrhTwHBrd9jPOOA=",
       "url": "_framework\/blazor.boot.json"
     }
   ],
-  "version": "RVBrSJN\/"
+  "version": "OXOKIjdT"
 };

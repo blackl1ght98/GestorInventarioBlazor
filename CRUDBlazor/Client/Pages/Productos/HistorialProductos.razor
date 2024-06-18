@@ -90,6 +90,7 @@
     private async Task GetBuscarHistorialProducto()
     {
         buscar = buscar ?? string.Empty;
+       
         if (string.IsNullOrEmpty(buscar))
         {
             // ...se llama a la función GetProducto() para obtener todos los productos
@@ -97,10 +98,13 @@
         }
         else
         {
+            //Si esta linea no estuviese se produce un bucle infinito de busqueda
+            todoElHistorial.Clear();
             for (int i = 1; i <= paginasTotales; i++)
             {
                 // Realizar una petición GET para cada página
                 var response = await http.GetAsync($"api/Producto/historialProducto?pagina={i}&CantidadAMostrar={paginacion.CantidadAMostrar}&buscar={buscar}");
+               
                 //Lee y serializa la respuesta
                 var content = await response.Content.ReadAsStringAsync();
                 //Se deserializa la respuesta
@@ -108,14 +112,18 @@
                 // Se añaden los productos encontrados en la página actual a la lista de 'todosLosProductos'
                 todoElHistorial.AddRange(productosEnPagina);
             }
-            paginasTotales = (int)Math.Ceiling((double)todoElHistorial.Count/paginacion.CantidadAMostrar);
-            MostrarProductosPorPagina();
+             paginasTotales = (int)Math.Ceiling((double)todoElHistorial.Count/paginacion.CantidadAMostrar);
+             MostrarProductosPorPagina();
         }
     }
     private void MostrarProductosPorPagina()
     {
+        //Calcula en la pagina que nos encontramos por ejemplo si estamos en la pagina 2 pues hace primero la operacion de resta
+        //2-1=1 y como la cantidadAMostrar es 2 pues 2*1=2
         int inicio = (paginacion.Pagina - 1) * paginacion.CantidadAMostrar;
         int fin = inicio + paginacion.CantidadAMostrar;
+        //Del historial que queremos buscar pues esto es lo que ocurre cuando nos cambiamos de pagina salta u omite la 2 primeros registros y
+        //muestra los 2 siguientes
         historiales = todoElHistorial.Skip(inicio).Take(paginacion.CantidadAMostrar).ToArray();
     }
     private async Task DownloadPDF()

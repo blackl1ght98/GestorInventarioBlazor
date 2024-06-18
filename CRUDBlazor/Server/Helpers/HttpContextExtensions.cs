@@ -66,11 +66,11 @@ namespace CRUDBlazor.Server.Helpers
 
             // Usa el método CountAsync() para obtener el número total de elementos en queryable de forma asíncrona.
             // CountAsync() es un método de Entity Framework que cuenta el número de elementos en una secuencia de forma asíncrona.
-            double conteo = await queryable.CountAsync();
+            double numeroTotalRegistros = await queryable.CountAsync();
 
             // Calcula el número total de páginas dividiendo el conteo por la cantidad de registros a mostrar y redondeando al entero más cercano hacia arriba.
             // Math.Ceiling() redondea un número decimal al entero más cercano hacia arriba.
-            double totalPaginas = Math.Ceiling(conteo / cantidadRegistrosAMostrar);
+            double totalPaginas = Math.Ceiling(numeroTotalRegistros / cantidadRegistrosAMostrar);
 
             // Añade el número total de páginas como un encabezado de respuesta HTTP.
             // Esto permite que el cliente sepa cuántas páginas hay en total.
