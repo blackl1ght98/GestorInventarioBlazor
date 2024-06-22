@@ -14,7 +14,17 @@
     else
     {
         <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+        <EditForm Model="this" OnValidSubmit="GetBuscarPedidos">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <InputText id="buscar" @bind-Value="buscar" class="form-control" placeholder="Buscar producto" />
+            <label>Fecha Inicio</label>
+            <InputDate id="fechaInicio" @bind-Value="fechaInicio" class="form-control" placeholder="Fecha de inicio" />
+            <label>Fecha Fin</label>
+            <InputDate id="fechaFin" @bind-Value="fechaFin" class="form-control" placeholder="Fecha de fin" />
 
+            <button type="submit" class="btn btn-primary mt-2">Buscar</button>
+        </EditForm>
         @foreach (var pedido in pedidos)
         {
             <div class="card mb-3">
@@ -55,6 +65,10 @@
     private Paginacion paginacion = new Paginacion();
     private int paginaActual = 1;
     private int paginasTotales;
+    private string buscar;
+    private DateTime? fechaInicio;
+    private DateTime? fechaFin;
+    private List<PedidosViewModel> todosLosPedidos = new List<PedidosViewModel>();
     //El metodo OnInitializedAsync() se encarga de cargar todo lo que se ponga en cuanto la pagina se carga, aquui obtenemos todos los pedidos
     protected override async Task OnInitializedAsync()
     {
@@ -62,7 +76,7 @@
     }
     private async Task<PedidosViewModel[]> GetAllPedidos()
     {
-       //Esta peticion al sercidor esta asi para el manejo de la paginacion es una consulta en la url
+        //Esta peticion al sercidor esta asi para el manejo de la paginacion es una consulta en la url
         var response = await http.GetAsync($"api/Pedidos?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}");
         if (response.IsSuccessStatusCode)
         {
@@ -75,11 +89,38 @@
         //Deserializa la respuesta del servidor y lo muestra al usuario
         return JsonSerializer.Deserialize<PedidosViewModel[]>(content);
     }
+    private async Task GetBuscarPedidos()
+    {
+        buscar = buscar ?? string.Empty;
+        string fechaInicioParam = fechaInicio.HasValue ? fechaInicio.Value.ToString("yyyy-MM-dd") : "";
+        string fechaFinParam = fechaFin.HasValue ? fechaFin.Value.ToString("yyyy-MM-dd") : "";
+        if (string.IsNullOrEmpty(buscar) && string.IsNullOrEmpty(fechaInicioParam) && string.IsNullOrEmpty(fechaFinParam))
+        {
+            pedidos = await GetAllPedidos();
+        }
+        todosLosPedidos.Clear();
+        for(var i=1;i<=paginasTotales; i++)
+        {
+            var response = await http.GetAsync($"api/Pedidos?pagina={i}&CantidadAMostrar={paginacion.CantidadAMostrar}&buscar={buscar}&fechaInicio={fechaInicioParam}&fechafin={fechaFinParam}");
+            var content = await response.Content.ReadAsStringAsync();
+            var pedidosEnPagina = JsonSerializer.Deserialize<PedidosViewModel[]>(content);
+            todosLosPedidos.AddRange(pedidosEnPagina);
+        }
+        paginasTotales = (int)Math.Ceiling((double)todosLosPedidos.Count / paginacion.CantidadAMostrar);
+        MostrarPedidosPorPaginas();
+    }
+    private void MostrarPedidosPorPaginas()
+    {
+        int inicio = (paginacion.Pagina - 1) * paginacion.CantidadAMostrar;
+        int fin = inicio + paginacion.CantidadAMostrar;
+        pedidos = todosLosPedidos.Skip(inicio).Take(paginacion.CantidadAMostrar).ToArray();
+    }
     private async Task PaginaSeleccionada(int pagina)
     {
         Console.WriteLine($"Pagina seleccionada: {pagina}");
         paginacion.Pagina = pagina;
         pedidos = await GetAllPedidos();
+        await GetBuscarPedidos();
         paginaActual = pagina;
         Console.WriteLine($"Pagina actual después de la selección: {paginaActual}");
     }

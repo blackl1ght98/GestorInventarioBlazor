@@ -1,0 +1,66 @@
+﻿@page "/detalleHistorialPedidos/{id}"
+@using CRUDBlazor.Shared.Pedidos
+@using System.Text.Json
+@inject HttpClient http
+@inject NavigationManager navigation
+<h3>Detalle Historial Pedidos</h3>
+<div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+    @if (detalles == null)
+    {
+        <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+        </div>
+    }
+    else
+    {
+        @foreach (var historial in detalles)
+        {
+            foreach (var detalle in historial.detalleHistorialPedidos)
+            {
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Datos del Historial</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <strong>nombreProducto: </strong> @detalle.producto.nombreProducto <span class="bi bi-box-seam-fill"></span>
+                        </p>
+                        <p class="card-text"><strong>cantidad:</strong> @detalle.cantidad</p>
+                        <p class="card-text"><strong>precio:</strong> @detalle.producto.precio</p>
+                        <p class="card-text"><strong>Estado pedido:</strong> @detalle.estadoPedido</p>
+                        <p class="card-text"><strong>Fecha Pedido:</strong> @detalle.fechaPedido</p>
+                        <p class="card-text"><strong>Numero Pedido:</strong> @detalle.numeroPedido</p>
+                    </div>
+                </div>
+            }
+        }
+
+}
+
+</div>
+    @code {
+    [Parameter]
+    public string id { get; set; }
+    private HistorialPedidosModel detalle = new HistorialPedidosModel();
+    private HistorialPedidosModel[] detalles = new HistorialPedidosModel[0];
+    private Paginacion paginacion = new Paginacion();
+    private int paginaActual = 1;
+    private int paginasTotales;
+    protected override async Task OnInitializedAsync()
+    {
+        detalles = await GetDetalleHistorial();
+    }
+    private async Task<HistorialPedidosModel[]> GetDetalleHistorial()
+    {
+        string url = $"api/Pedidos/detalleHistorialPedido/{id}?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}";
+        var response = await http.GetAsync(url);
+        Console.WriteLine("La respuesta del detalle del historial es: " + response);
+     
+        //Lee y serializa la petición
+        var content = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("La respuesta es: " + content);
+
+        return JsonSerializer.Deserialize<HistorialPedidosModel[]>(content);
+    }
+   
+}

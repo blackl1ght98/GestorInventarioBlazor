@@ -22,49 +22,56 @@
     <AuthorizeView Roles="administrador">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="administrarusuarios" Match="NavLinkMatch.All">
-                <span class="oi oi-shield" aria-hidden="true"></span> Administrar
+                    <span class="bi bi-person-gear" style="font-size: 24px; margin-right: 10px;" aria-hidden="true"></span> Administrar
+
             </NavLink>
         </div>
    </AuthorizeView>
     <AuthorizeView Roles="administrador">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="proveedores" Match="NavLinkMatch.All">
-                <span class="oi oi-person" aria-hidden="true"></span> Proveedores
+                    <span class="bi bi-person-lines-fill" style="font-size: 24px; margin-right: 10px;" aria-hidden="true"></span> Proveedores
             </NavLink>
         </div>
         </AuthorizeView>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="productos" Match="NavLinkMatch.All">
-                <span class="oi oi-person" aria-hidden="true"></span> Productos
+                <span class="bi bi-bag" style="font-size: 24px; margin-right: 10px;" aria-hidden="true"></span> Productos
             </NavLink>
         </div>
          <AuthorizeView Roles="administrador, usuario">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="pedidos" Match="NavLinkMatch.All">
-                <span class="oi oi-person" aria-hidden="true"></span> Pedidos
+                    <span class="bi bi-box-seam" style="font-size: 24px; margin-right: 10px;" aria-hidden="true"></span> Pedidos
             </NavLink>
         </div>
         </AuthorizeView>
          <AuthorizeView Roles="administrador, usuario">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="carritoitems" Match="NavLinkMatch.All">
-                <span class="oi oi-person" aria-hidden="true"></span> Carrito
+                    <span class="bi bi-basket3" style="font-size: 24px; margin-right: 10px;" aria-hidden="true"></span> Carrito
             </NavLink>
         </div>
         </AuthorizeView>
          <AuthorizeView Roles="administrador">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="departamentos" Match="NavLinkMatch.All">
-                <span class="oi oi-person" aria-hidden="true"></span> Departamentos
+                    <span class="bi bi-bar-chart-line" style="font-size: 24px; margin-right: 10px;" aria-hidden="true"></span> Departamentos
             </NavLink>
         </div>
         </AuthorizeView>
         
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="historialproducto" Match="NavLinkMatch.All">
-                <span class="oi oi-person" aria-hidden="true"></span> Historial Productos
+                <span class="bi bi-clock-history" style="font-size: 24px; margin-right: 10px;" aria-hidden="true"></span> Historial Productos
             </NavLink>
         </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="historialpedidos" Match="NavLinkMatch.All">
+                <span class="bi bi-clock-history" style="font-size: 24px; margin-right: 10px;" aria-hidden="true"></span> Historial Pedidos
+            </NavLink>
+        </div>
+        
        @*  <div class="nav-item px-3">
             <NavLink class="nav-link" href="login" Match="NavLinkMatch.All">
                 <span class="oi oi-account-login" aria-hidden="true"></span> Iniciar sesión

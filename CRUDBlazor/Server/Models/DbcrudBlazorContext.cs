@@ -19,9 +19,13 @@ public partial class DbcrudBlazorContext : DbContext
 
     public virtual DbSet<Departamento> Departamentos { get; set; }
 
+    public virtual DbSet<DetalleHistorialPedido> DetalleHistorialPedidos { get; set; }
+
     public virtual DbSet<DetalleHistorialProducto> DetalleHistorialProductos { get; set; }
 
     public virtual DbSet<DetallePedido> DetallePedidos { get; set; }
+
+    public virtual DbSet<HistorialPedido> HistorialPedidos { get; set; }
 
     public virtual DbSet<HistorialProducto> HistorialProductos { get; set; }
 
@@ -67,6 +71,27 @@ public partial class DbcrudBlazorContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<DetalleHistorialPedido>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__DetalleH__3214EC07B2930738");
+
+            entity.Property(e => e.EstadoPedido)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaPedido).HasColumnType("datetime");
+            entity.Property(e => e.NumeroPedido)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.HistorialPedido).WithMany(p => p.DetalleHistorialPedidos)
+                .HasForeignKey(d => d.HistorialPedidoId)
+                .HasConstraintName("FK__DetalleHi__Histo__5224328E");
+
+            entity.HasOne(d => d.Producto).WithMany(p => p.DetalleHistorialPedidos)
+                .HasForeignKey(d => d.ProductoId)
+                .HasConstraintName("FK__DetalleHi__Produ__531856C7");
+        });
+
         modelBuilder.Entity<DetalleHistorialProducto>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__DetalleH__3214EC07A0700910");
@@ -97,6 +122,23 @@ public partial class DbcrudBlazorContext : DbContext
             entity.HasOne(d => d.Producto).WithMany(p => p.DetallePedidos)
                 .HasForeignKey(d => d.ProductoId)
                 .HasConstraintName("FK__DetallePe__Produ__19DFD96B");
+        });
+
+        modelBuilder.Entity<HistorialPedido>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3214EC07C0A1F4BD");
+
+            entity.Property(e => e.Accion)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Fecha).HasColumnType("datetime");
+            entity.Property(e => e.Ip)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.HistorialPedidos)
+                .HasForeignKey(d => d.IdUsuario)
+                .HasConstraintName("FK_IdUsuario_HistorialPedidos");
         });
 
         modelBuilder.Entity<HistorialProducto>(entity =>

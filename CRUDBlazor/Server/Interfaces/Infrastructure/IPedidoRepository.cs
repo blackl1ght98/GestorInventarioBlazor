@@ -13,5 +13,7 @@ namespace CRUDBlazor.Server.Interfaces.Infrastructure
         Task<(bool, string)> EliminarPedido(int idInt);
         Task<(bool, string)> EditarPedido(EditarPedido model);
         Task<List<Producto>> ObtenerProductosPedido();
+        Task<(bool, string, byte[])> DescargarPDF();
+        Task<(bool, string)> EliminarHistorial();
     }
 }

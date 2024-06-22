@@ -90,8 +90,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xDcmVhclBlZGlkby5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/DetalleHistorialPedidos.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xEZXRhbGxlSGlzdG9yaWFsUGVkaWRvcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/EliminarPedido.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xFbGltaW5hclBlZGlkby5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/HistorialPedidos.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVkaWRvc1xIaXN0b3JpYWxQZWRpZG9zLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/guill/OneDrive/Escritorio/Proyectos .NET/blazor/CRUDBlazor/CRUDBlazor/Client/Pages/Pedidos/ObtenerDetallesPedido.razor]

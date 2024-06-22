@@ -16,6 +16,7 @@
     else
     {
         <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+        <button @onclick="EliminarTodoHistorial" class="mt-2">Limpiar historial</button>
         <button @onclick="DownloadPDF" class="mt-2">Descargar PDF</button>
         <EditForm Model="this" OnValidSubmit="GetBuscarHistorialProducto">
             <DataAnnotationsValidator />
@@ -143,6 +144,18 @@
             await jsRuntime.InvokeVoidAsync("saveAsFile", "historial.pdf", base64);
         }
         
+    }
+    private async Task EliminarTodoHistorial()
+    {
+        string url = $"api/Producto/deleteAllHistorial";
+
+        var response = await http.DeleteAsync(url);
+        if (response.IsSuccessStatusCode)
+        {
+            historiales = await GetHistorial();
+        }
+
+
     }
     private async Task PaginaSeleccionada(int pagina)
     {

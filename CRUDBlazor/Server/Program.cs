@@ -8,7 +8,9 @@ using CRUDBlazor.Server.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -31,11 +33,13 @@ else
 
 builder.Services.AddControllers(options =>
 {
-}).AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+}).AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
+);
 
 builder.Services.AddDbContext<DbcrudBlazorContext>(options =>
 {
     options.UseSqlServer(connectionString);
+
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 }
 );

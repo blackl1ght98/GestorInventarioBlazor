@@ -1700,3 +1700,4 @@ C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\C
 C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Client\obj\Debug\net7.0\refint\CRUDBlazor.Client.dll
 C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Client\obj\Debug\net7.0\CRUDBlazor.Client.pdb
 C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Client\obj\Debug\net7.0\ref\CRUDBlazor.Client.dll
+C:\Users\guill\OneDrive\Escritorio\Proyectos .NET\blazor\CRUDBlazor\CRUDBlazor\Client\bin\Debug\net7.0\libman.json

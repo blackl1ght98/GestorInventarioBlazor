@@ -1,0 +1,167 @@
+﻿@page "/historialpedidos"
+@using CRUDBlazor.Shared.Pedidos
+@using System.Text.Json
+@inject HttpClient http
+@inject NavigationManager navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime jsRuntime
+<h3>Historial Pedidos</h3>
+<div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+
+    @if (historiales == null)
+    {
+        <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+        </div>
+    }
+    else
+    {
+        <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+        <button @onclick="DownloadPDF" class="mt-2">Descargar PDF</button>
+        <button @onclick="EliminarTodoHistorial" class="mt-2">Limpiar historial</button>
+        <EditForm Model="this" OnValidSubmit="GetBuscarPedidosHistorial">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <InputText id="buscar" @bind-Value="buscar" class="form-control" placeholder="Buscar historial" />
+            <button type="submit" class="btn btn-primary mt-2">Buscar</button>
+        </EditForm>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Accion</th>
+                    <th>Ip</th>
+                    <th>IdUsuario</th>                  
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pedido in historiales)
+                {
+                    <tr>
+                        <td>@pedido.fecha</td>
+                        <td>@pedido.accion</td>
+                        <td>@pedido.ip</td>
+                        <td>@pedido.idUsuario</td>                     
+                    </tr>
+                        <div>
+                            <AuthorizeView Roles="administrador">
+                                <a href="/detalleHistorialPedidos/@pedido.id" class="btn btn-info mt-2 ml-2">Detalle historial</a>
+                            </AuthorizeView>
+                        </div>
+                    }              
+            </tbody>
+            </table>
+        }
+
+    
+   
+</div>
+
+@code {
+    private HistorialPedidosModel historial = new HistorialPedidosModel();
+    private HistorialPedidosModel[] historiales;
+    private Paginacion paginacion = new Paginacion();
+    public int paginaActual = 1;
+    public int paginasTotales;
+    public string buscar;
+    private AuthenticationState authenticationState;
+    private List<HistorialPedidosModel> todosLosHistoriales = new List<HistorialPedidosModel>();
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            historiales = await GetHistorialesPedidos();
+        }
+        else
+        {
+            navigation.NavigateTo("/login");
+        }
+
+    }
+    private async Task<HistorialPedidosModel[]> GetHistorialesPedidos()
+    {
+        //Realizamos una peticion get al servidor
+        var response = await http.GetAsync($"api/Pedidos/historialPedidos?pagina={paginacion.Pagina}&CantidadAMostrar={paginacion.CantidadAMostrar}");
+        Console.WriteLine("Esto es la respuesta:" + response);
+        if (response.IsSuccessStatusCode)
+        {
+            //Si la respuesta es satisfactoria obtiene de la cabecera de la peticion el total de paginas a costrar
+            paginasTotales = int.Parse(response.Headers.GetValues("totalPaginas").FirstOrDefault());
+            Console.WriteLine($"Paginas totales después de obtener usuarios: {paginasTotales}");
+        }
+        var content = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("Esto es el contenido:" + content);
+        //Deserializamos la respuesta del servidor y la mostramos
+        return JsonSerializer.Deserialize<HistorialPedidosModel[]>(content);
+        StateHasChanged();
+
+    }
+    private async Task GetBuscarPedidosHistorial()
+    {
+        buscar = buscar ?? string.Empty;
+
+        if (string.IsNullOrEmpty(buscar))
+        {
+            historiales = await GetHistorialesPedidos();
+        }
+        todosLosHistoriales.Clear();
+        for (var i = 1; i <= paginasTotales; i++)
+        {
+            var response = await http.GetAsync($"api/Pedidos/historialPedidos?pagina={i}&CantidadAMostrar={paginacion.CantidadAMostrar}&buscar={buscar}");
+            var content = await response.Content.ReadAsStringAsync();
+            var pedidosEnPagina = JsonSerializer.Deserialize<HistorialPedidosModel[]>(content);
+            todosLosHistoriales.AddRange(pedidosEnPagina);
+        }
+        paginasTotales = (int)Math.Ceiling((double)todosLosHistoriales.Count / paginacion.CantidadAMostrar);
+        MostrarPedidosPorPaginas();
+    }
+    private void MostrarPedidosPorPaginas()
+    {
+        int inicio = (paginacion.Pagina - 1) * paginacion.CantidadAMostrar;
+        int fin = inicio + paginacion.CantidadAMostrar;
+        historiales = todosLosHistoriales.Skip(inicio).Take(paginacion.CantidadAMostrar).ToArray();
+    }
+    private async Task DownloadPDF()
+    {
+        string url = $"api/Pedidos/descargarhistorialPDF";
+
+        var response = await http.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsByteArrayAsync();
+
+            // Convierte el contenido a una cadena Base64
+            var base64 = Convert.ToBase64String(content);
+
+            // Llama a una función de JavaScript para descargar el archivo
+            await jsRuntime.InvokeVoidAsync("saveAsFile", "historial.pdf", base64);
+        }
+
+    }
+    private async Task EliminarTodoHistorial()
+    {
+        string url = $"api/Pedidos/deleteAllHistorial";
+
+        var response = await http.DeleteAsync(url);
+        if (response.IsSuccessStatusCode)
+        {
+            historiales = await GetHistorialesPedidos();
+        }
+
+
+    }
+    private async Task PaginaSeleccionada(int pagina)
+    {
+        Console.WriteLine($"Pagina seleccionada: {pagina}");
+        paginacion.Pagina = pagina;
+        historiales = await GetHistorialesPedidos();
+        await GetBuscarPedidosHistorial();
+        paginaActual = pagina;
+        Console.WriteLine($"Pagina actual después de la selección: {paginaActual}");
+    }
+}

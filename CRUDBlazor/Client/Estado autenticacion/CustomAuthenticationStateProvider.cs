@@ -1,4 +1,5 @@
 ﻿using CRUDBlazor.Shared.Auth;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
 using System.Security.Claims;
@@ -10,10 +11,11 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     private readonly HttpClient _httpClient;
     //Este servicio ayuda a manejar el estado de autenticacion
     private AuthenticationState _cachedAuthState;
-
-    public CustomAuthenticationStateProvider(HttpClient httpClient)
+    private readonly NavigationManager _navigationManager;
+    public CustomAuthenticationStateProvider(HttpClient httpClient, NavigationManager navigation)
     {
         _httpClient = httpClient;
+        _navigationManager = navigation;
        
     }
 
@@ -113,6 +115,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
         }
         else
         {
+            _navigationManager.NavigateTo("/login");
             // Si authInfo es null o el usuario no está autenticado, crea una nueva identidad sin claims.
             identity = new ClaimsIdentity();
         }

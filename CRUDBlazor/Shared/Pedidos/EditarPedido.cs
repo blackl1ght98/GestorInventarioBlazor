@@ -11,5 +11,6 @@ namespace CRUDBlazor.Shared.Pedidos
         public int id { get; set; }
         public DateTime fechaPedido { get; set; }
         public string estadoPedido { get; set; }
+        public string? numeroPedido { get; set; }
     }
 }
