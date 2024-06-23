@@ -13,7 +13,6 @@ else
     <table class="table">
         <thead>
             <tr>
-
                 <th>Nombre</th>
                 <th>Acciones</th>
             </tr>
@@ -24,13 +23,16 @@ else
                 <tr>
                     <td>@departamento.nombre</td>
                     <td>
-                        <button @onclick="(()=>EliminarDepartamento(departamento.idDepartamento))">Eliminar</button>
+                        <button @onclick="(()=>EliminarDepartamento(departamento.idDepartamento))" class="btn btn-danger">Eliminar</button>
+                        <span style="display: inline-block; width: 10px;"></span>
+                        <a href="/actualizardepartamento/@departamento.idDepartamento" class="btn btn-primary">Actualizar</a>
                     </td>
-                    <td><a href="/actualizardepartamento/@departamento.idDepartamento" class="btn btn-primary">Actualizar</a></td>
                 </tr>
             }
         </tbody>
     </table>
+
+
 }
 <a href="/creardepartamento" class="btn btn-info">Crear departamento</a>
 <br />

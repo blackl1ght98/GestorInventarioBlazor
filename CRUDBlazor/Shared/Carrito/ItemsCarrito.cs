@@ -21,6 +21,8 @@ namespace CRUDBlazor.Shared.Carrito
         public string nombreProducto { get; set; }
         public int cantidad { get; set; }
         public double precio { get; set; }
+        public string  imagen { get; set; }
+
         public Proveedor idProveedorNavigation { get; set; }
     }
 

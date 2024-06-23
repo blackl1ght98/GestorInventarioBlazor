@@ -19,6 +19,7 @@
     else
     {
         <ConfiguracionPaginacion PaginasTotales="prop.paginasTotales" PaginaActual="prop.paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
+       
         <EditForm Model="this" OnValidSubmit="GetBuscarProducto">
             <DataAnnotationsValidator />
             <ValidationSummary />
@@ -35,11 +36,13 @@
                 <option value="@proveedor.id">@proveedor.nombreProveedor</option>
             }
         </select>
-
-            <button type="submit" class="btn btn-primary mt-2">Buscar</button>
+            <div class="d-flex justify-content-between mt-2 mb-3">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+                <button @onclick="LimpiarFiltros" class="btn btn-warning">Limpiar filtros</button>
+            </div>
         </EditForm>
-        <button @onclick="LimpiarFiltros">Limpiar filtros</button>
-
+        
+      
         @foreach (var producto in prop.productos)
         {
             <div class="card mb-3">

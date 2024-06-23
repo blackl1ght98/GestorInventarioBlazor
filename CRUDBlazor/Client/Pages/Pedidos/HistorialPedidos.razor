@@ -17,8 +17,8 @@
     else
     {
         <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
-        <button @onclick="DownloadPDF" class="mt-2">Descargar PDF</button>
-        <button @onclick="EliminarTodoHistorial" class="mt-2">Limpiar historial</button>
+        <button @onclick="DownloadPDF" class="btn btn-info mt-2 mb-2">Descargar PDF</button>
+        <button @onclick="EliminarTodoHistorial" class="btn btn-danger mt-2 mb-2">Limpiar historial</button>
         <EditForm Model="this" OnValidSubmit="GetBuscarPedidosHistorial">
             <DataAnnotationsValidator />
             <ValidationSummary />

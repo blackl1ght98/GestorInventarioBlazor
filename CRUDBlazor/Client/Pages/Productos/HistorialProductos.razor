@@ -7,7 +7,7 @@
 
 <h3>Historial Productos</h3>
 <div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
-    @if (historiales== null)
+    @if (historiales == null)
     {
         <div class="spinner-border" role="status">
             <span class="sr-only"></span>
@@ -16,40 +16,45 @@
     else
     {
         <ConfiguracionPaginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"></ConfiguracionPaginacion>
-        <button @onclick="EliminarTodoHistorial" class="mt-2">Limpiar historial</button>
-        <button @onclick="DownloadPDF" class="mt-2">Descargar PDF</button>
+        <button @onclick="EliminarTodoHistorial" class=" btn btn-danger mt-2">Limpiar historial</button>
+        <button @onclick="DownloadPDF" class=" btn btn-info mt-2">Descargar PDF</button>
         <EditForm Model="this" OnValidSubmit="GetBuscarHistorialProducto">
             <DataAnnotationsValidator />
             <ValidationSummary />
-            <InputText id="buscar" @bind-Value="buscar" class="form-control mt-2" placeholder="Buscar historial" />            
+            <InputText id="buscar" @bind-Value="buscar" class="form-control mt-2" placeholder="Buscar historial" />
             <button type="submit" class="btn btn-primary mt-2">Buscar</button>
         </EditForm>
-        @foreach(var historial in historiales)
+        <table class="table mt-2">
+            <thead>
+                <tr>
+                    <th>Ip</th>
+                    <th>Accion</th>
+                    <th>Fecha</th>
+                    <th>Id Usuario</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var historial in historiales)
+                {
+                    <tr>
+                        <td>@historial.ip</td>
+                        <td>@historial.accion</td>
+                        <td>@historial.fecha</td>
+                        <td>@historial.usuarioId</td>
+                        <td>
+                            <AuthorizeView Roles="administrador">
+                                <a href="/detalleHistorial/@historial.id" class="btn btn-info">Detalle historial</a>
+                            </AuthorizeView>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (showAlert)
         {
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5>Datos del Historial</h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text"><strong>Ip: </strong> @historial.ip</p>
-                    <p class="card-text"><strong>Accion:</strong> @historial.accion</p>             
-                    <p class="card-text"><strong>Fecha:</strong> @historial.fecha</p>
-                    <p class="card-text"><strong>Id Usuario:</strong> @historial.usuarioId</p>              
-                </div>
-                <div class="card-footer d-flex justify-content-between">
-
-                    <div>
-                        <AuthorizeView Roles="administrador">
-                            <a href="/detalleHistorial/@historial.id" class="btn btn-info mt-2 ml-2">Detalle historial</a>
-                        </AuthorizeView>                      
-                    </div>                  
-                    @if (showAlert)
-                    {
-                        <div class="alert alert-danger mt-2" role="alert">
-                            @alertMessage
-                        </div>
-                    }
-                </div>
+            <div class="alert alert-danger mt-2" role="alert">
+                @alertMessage
             </div>
         }
     }

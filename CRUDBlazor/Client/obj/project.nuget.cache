@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Rh8bilBMxMTAWOg13MrPvg2OhFVlbJft9rUkCgpfl2jQv37mzLMIQblhwPARS3AdKvYeP2+1nwWGetMQzKXvtw==",
+  "dgSpecHash": "1CR+bjgmc2M=",
   "success": true,
   "projectFilePath": "C:\\Users\\guill\\OneDrive\\Escritorio\\Proyectos .NET\\blazor\\CRUDBlazor\\CRUDBlazor\\Client\\CRUDBlazor.Client.csproj",
   "expectedPackageFiles": [
@@ -35,9 +35,9 @@
     "C:\\Users\\guill\\.nuget\\packages\\microsoft.extensions.primitives\\7.0.0\\microsoft.extensions.primitives.7.0.0.nupkg.sha512",
     "C:\\Users\\guill\\.nuget\\packages\\microsoft.jsinterop\\7.0.18\\microsoft.jsinterop.7.0.18.nupkg.sha512",
     "C:\\Users\\guill\\.nuget\\packages\\microsoft.jsinterop.webassembly\\7.0.16\\microsoft.jsinterop.webassembly.7.0.16.nupkg.sha512",
-    "C:\\Users\\guill\\.nuget\\packages\\microsoft.net.illink.analyzers\\7.0.100-1.23211.1\\microsoft.net.illink.analyzers.7.0.100-1.23211.1.nupkg.sha512",
-    "C:\\Users\\guill\\.nuget\\packages\\microsoft.net.illink.tasks\\7.0.100-1.23211.1\\microsoft.net.illink.tasks.7.0.100-1.23211.1.nupkg.sha512",
-    "C:\\Users\\guill\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\8.0.5\\microsoft.net.sdk.webassembly.pack.8.0.5.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.net.illink.analyzers\\7.0.100-1.23401.1\\microsoft.net.illink.analyzers.7.0.100-1.23401.1.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.net.illink.tasks\\7.0.100-1.23401.1\\microsoft.net.illink.tasks.7.0.100-1.23401.1.nupkg.sha512",
+    "C:\\Users\\guill\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\8.0.6\\microsoft.net.sdk.webassembly.pack.8.0.6.nupkg.sha512",
     "C:\\Users\\guill\\.nuget\\packages\\system.io.pipelines\\7.0.0\\system.io.pipelines.7.0.0.nupkg.sha512",
     "C:\\Users\\guill\\.nuget\\packages\\system.text.encodings.web\\7.0.0\\system.text.encodings.web.7.0.0.nupkg.sha512",
     "C:\\Users\\guill\\.nuget\\packages\\system.text.json\\7.0.0\\system.text.json.7.0.0.nupkg.sha512",

@@ -29,6 +29,6 @@
     {
         //Hace la peticion post al servidor
         var resultado = await http.PostAsJsonAsync($"api/Departamento", midepartamento);
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/departamentos");
     }
 }

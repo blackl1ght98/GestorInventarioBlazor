@@ -6,8 +6,8 @@
 <h3>ActualizarProveedor</h3>
 <EditForm Model="proveedor" class="form-group">
     <InputText @bind-Value="proveedor.nombreProveedor" @oninput="(e=> proveedor.nombreProveedor= e.Value.ToString())" class="form-control" placeholder="Nombre del proveedor" />
-    <InputText @bind-Value="proveedor.direccion" @oninput="(e=> proveedor.direccion= e.Value.ToString())" class="form-control" placeholder="Dirección del proveedor" />
-    <InputText @bind-Value="proveedor.contacto" @oninput="(e=> proveedor.contacto= e.Value.ToString())" class="form-control" placeholder="Contacto del proveedor" />
+    <InputText @bind-Value="proveedor.direccion" @oninput="(e=> proveedor.direccion= e.Value.ToString())" class="form-control mt-2" placeholder="Dirección del proveedor" />
+    <InputText @bind-Value="proveedor.contacto" @oninput="(e=> proveedor.contacto= e.Value.ToString())" class="form-control mt-2" placeholder="Contacto del proveedor" />
 
     <button @onclick="(()=>EditarProveedor(proveedor))" class="btn btn-primary mt-2">Actualizar Proveedor</button>
 </EditForm>
